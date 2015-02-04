@@ -5,4 +5,11 @@
   <version>0.0.1-SNAPSHOT</version>
   <name>replaymop</name>
   <description>deterministic replay of java programs using monitoring oriented programming</description>
+  <dependencies>
+  	<dependency>
+  		<groupId>com.beust</groupId>
+  		<artifactId>jcommander</artifactId>
+  		<version>1.47</version>
+  	</dependency>
+  </dependencies>
 </project>
