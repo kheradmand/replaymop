@@ -1,7 +1,10 @@
 package replaymop;
 
 import java.io.File;
+import java.io.PrintWriter;
 
+import replaymop.output.aspectj.Aspect;
+import replaymop.output.aspectj.AspectJProcessor;
 import replaymop.parser.RSParser;
 import replaymop.parser.rs.ReplaySpecification;
 
@@ -27,10 +30,17 @@ public class Main {
 		}
 	}
 	
+	
 	public static void main(String[] args){
 		try{
 			parseArguments(args);
-			ReplaySpecification spec = RSParser.parse(new File(parameters.inputFile));
+			File inputFile = new File(parameters.inputFile);
+			ReplaySpecification spec = RSParser.parse(inputFile);
+			Aspect aspect = AspectJProcessor.process(spec);
+			File outputFile = new File(inputFile.getParent() + File.separator + aspect.name + ".aj");
+			PrintWriter writer = new PrintWriter(outputFile);
+			writer.println(aspect.toString());
+			writer.close();
 		}catch(Exception e){
 			e.printStackTrace();
 			System.exit(1);
