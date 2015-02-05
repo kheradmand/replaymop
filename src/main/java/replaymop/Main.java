@@ -3,7 +3,7 @@ package replaymop;
 import java.io.File;
 import java.io.PrintWriter;
 
-import replaymop.output.AspectJProcessor;
+import replaymop.output.AspectJGenerator;
 import replaymop.output.aspectj.Aspect;
 import replaymop.parser.RSParser;
 import replaymop.parser.rs.ReplaySpecification;
@@ -36,7 +36,7 @@ public class Main {
 			parseArguments(args);
 			File inputFile = new File(parameters.inputFile);
 			ReplaySpecification spec = RSParser.parse(inputFile);
-			Aspect aspect = AspectJProcessor.process(spec);
+			Aspect aspect = AspectJGenerator.generate(spec);
 			File outputFile = new File(inputFile.getParent() + File.separator + aspect.name + ".aj");
 			PrintWriter writer = new PrintWriter(outputFile);
 			writer.println(aspect.toString());
