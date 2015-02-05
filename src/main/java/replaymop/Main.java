@@ -17,7 +17,7 @@ public class Main {
 		try{
 			parameterParser = new JCommander(parameters, args);
 		}catch (ParameterException pe){
-			System.out.println(pe.getMessage());
+			System.err.println(pe.getMessage());
 			return;
 		}
 		parameterParser.setProgramName("replaymop");
@@ -28,8 +28,12 @@ public class Main {
 	}
 	
 	public static void main(String[] args){
-		parseArguments(args);
-		ReplaySpecification spec = RSParser.parse(new File(parameters.inputFile));
-		
+		try{
+			parseArguments(args);
+			ReplaySpecification spec = RSParser.parse(new File(parameters.inputFile));
+		}catch(Exception e){
+			e.printStackTrace();
+			System.exit(1);
+		}
 	}
 }
