@@ -17,6 +17,7 @@ public class ReplaySpecification {
 	public Set<String> afterSync;
 	public boolean afterMonitorExit = false;
 	public List<ScheduleUnit> schedule;
+	public String input;
 	
 	public static final String[] beforeSyncDefault = {
 		"void java.lang.Thread.join()",

@@ -1,5 +1,6 @@
-package replaymop.output.aspectj;
+package replaymop.output;
 
+import replaymop.output.aspectj.Aspect;
 import replaymop.parser.rs.ReplaySpecification;
 
 public class AspectJProcessor {
@@ -7,7 +8,7 @@ public class AspectJProcessor {
 	Aspect aspect;
 	private AspectJProcessor(ReplaySpecification spec){
 		this.spec = spec;
-		aspect = new Aspect(spec.fileName);
+		aspect = new Aspect(spec.fileName + "Aspect");
 	}
 	
 	void startProcessing(){

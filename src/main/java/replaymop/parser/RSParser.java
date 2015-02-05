@@ -130,6 +130,10 @@ public class RSParser {
 		}
 		throw new ReplayMOPException("expected ;");
 	}
+	
+	void handleInput() {
+		spec.input += input.nextLine() + "\n";
+	}
 
 	private void startParsing() throws ReplayMOPException {
 		while (input.hasNext()) {
@@ -152,6 +156,9 @@ public class RSParser {
 				break;
 			case "schedule:":
 				handleSchedule();
+				break;
+			case "input:":
+				handleInput();
 				break;
 			default:
 				throw new ReplayMOPException("unrecognized keyword");

@@ -3,8 +3,8 @@ package replaymop;
 import java.io.File;
 import java.io.PrintWriter;
 
+import replaymop.output.AspectJProcessor;
 import replaymop.output.aspectj.Aspect;
-import replaymop.output.aspectj.AspectJProcessor;
 import replaymop.parser.RSParser;
 import replaymop.parser.rs.ReplaySpecification;
 
