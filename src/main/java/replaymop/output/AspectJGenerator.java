@@ -17,33 +17,10 @@ public class AspectJGenerator {
 	}
 	
 	
-	void generateImports(){
-		addCode("import java.util.concurrent.locks;");
-	}
+	
 	
 	void generateThreadCreationOrderEnforcer(){
-		addCode("final Lock  threadCreationLock = "
-				+ "new ReentrantLock();");
-		addCode("final Condition threadCreated = threadCreationLock.newCondition();");
-		
-		addCode("final long[] threadOrder = " + spec.threadOrder.toString() + ";");
-		addCode("int threadOrderIndex = 0");
-		
-		addCode("before(): call(java.lang.Thread.new(*)){");
-		addCode("threadCreationLock.lock();");
-		addCode("while (threadOrderIndex < threadOrder.length && threadOrder[threadOrderIndex] != Thread.currentThread().getId()){");
-		addCode("try{");
-		addCode("threadCreated.await()");
-		addCode("catch (InterruptedException e){}");
-		addCode("}");
-		
-		addCode("after(): call(java.lang.Thread.new(*)){");
-		addCode("threadOrderIndex++");
-		addCode("headMatched.signalAll()");
-		addCode("threadCreationLock.unlock();");
-		addCode("}");
-		
-		
+		aspect.body.replace("%THREAD_CREATION_ORDER%", spec.threadOrder.toString());
 		
 	}
 	
@@ -52,8 +29,8 @@ public class AspectJGenerator {
 	}
 	
 	void startGeneration(){
-		addCode("final Object globalLock = new Object();");
-		generateImports();
+		
+		
 		generateThreadCreationOrderEnforcer();
 		//generateVariableLocks();
 		//generatePointcuts();
