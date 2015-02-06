@@ -66,7 +66,7 @@ public class AspectJGenerator {
 
 	void startGeneration() {
 		generateThreadCreationOrder();
-		// generateVariableLocks();
+		// generateVariableLocks(); //TODO: complete this part
 		generateShareVariableAccessPointCut();
 		generateBeforeSyncPointCut();
 		generateAfterSyncPointCut();
