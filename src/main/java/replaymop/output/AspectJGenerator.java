@@ -1,5 +1,9 @@
 package replaymop.output;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
+
 import replaymop.output.aspectj.Aspect;
 import replaymop.parser.rs.ReplaySpecification;
 
@@ -12,20 +16,61 @@ public class AspectJGenerator {
 		aspect = new Aspect(spec.fileName + "Aspect");
 	}
 
-	void generateThreadCreationOrderEnforcer() {
+	void generateThreadCreationOrder() {
 		aspect.setParameter("THREAD_CREATION_ORDER",
 				spec.threadOrder.toString());
 	}
 
-	void generateSyncPointCuts() {
-		// for (String func : spec.be)
+	void generateShareVariableAccessPointCut(){
+		StringJoiner pointcuts = new StringJoiner(" ||\n");
+		for (ReplaySpecification.Variable var : spec.shared){
+			pointcuts.add(String.format("set(%s %s)", var.type, var.name));
+			pointcuts.add(String.format("get(%s %s)", var.type, var.name));
+		}
+		aspect.setParameter("SHARED_VAR_ACCESS", pointcuts.toString());
+	}
+	
+	void generateBeforeSyncPointCut() {
+		StringJoiner pointcuts = new StringJoiner(" ||\n");
+		if (spec.beforeMonitorEnter)
+			pointcuts.add("lock()");
+		for (String sync : spec.beforeSync){
+			pointcuts.add(String.format("call(%s)", sync));
+		}
+		aspect.setParameter("BEFORE_SYNC_POINTCUTS", pointcuts.toString());
+	}
+	
+	void generateAfterSyncPointCut() {
+		StringJoiner pointcuts = new StringJoiner(" ||\n");
+		if (spec.afterMonitorExit)
+			pointcuts.add("unlock()");
+		for (String sync : spec.afterSync){
+			pointcuts.add(String.format("call(%s)", sync));
+		}
+		aspect.setParameter("AFTER_SYNC_POINTCUTS", pointcuts.toString());
+	}
+	
+	void generateThreadSchedule() {
+		List<Long> threads = new ArrayList<>();
+		List<Integer> counts = new ArrayList<>();
+		for (ReplaySpecification.ScheduleUnit unit : spec.schedule){
+			threads.add(unit.thread);
+			counts.add(unit.count);
+		}
+		aspect.setParameter("SCHEDULE_THERAD",
+				threads.toString());
+		aspect.setParameter("SCHEDULE_COUNT",
+				counts.toString());
+		
 	}
 
 	void startGeneration() {
-
-		generateThreadCreationOrderEnforcer();
+		generateThreadCreationOrder();
 		// generateVariableLocks();
-		// generatePointcuts();
+		generateShareVariableAccessPointCut();
+		generateBeforeSyncPointCut();
+		generateAfterSyncPointCut();
+		generateThreadSchedule();
 
 	}
 

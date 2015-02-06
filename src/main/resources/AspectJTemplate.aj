@@ -31,12 +31,22 @@ public aspect %NAME% {
 	
 	//===========================thread creation end===========================
 	
+	//=============================shared var begin============================
+	
+	//pointcut sharedVarGet():  %SHARED_VAR_GET%
+	
+	//pointcut sharedVarSet():  %SHARED_VAR_SET%
+	
+	pointcut shareVarAccess(): %SHARED_VAR_ACCESS% //sharedVarGet() || sharedVarSet(); 
+	
+	//==============================shared var end=============================
+	
 	//===========================sync pointcut begin===========================
 	
 	
-	beforeSync(): %BEFORE_SYNC_POINTCUTS% ;
+	pointcut beforeSync(): %BEFORE_SYNC_POINTCUTS% || sharedVarAccess() ;
 	
-	afterSync(): %AFTER_SYNC_POINTCUTS% ;
+	pointcut afterSync(): %AFTER_SYNC_POINTCUTS% ;
 	
 	before(): beforeSync() &&  !cflow(adviceexecution()){
 		enforceSchedule();
@@ -67,7 +77,7 @@ public aspect %NAME% {
 			}
 			if (threadScheduleIndex < schedule_thread.length){
 				schedule_count[threadScheduleIndex]--;
-				if (schedule_count[threadScheduleIndex]){
+				if (schedule_count[threadScheduleIndex] == 0){
 					threadScheduleIndex++;
 					this.notifyAll();
 				}
