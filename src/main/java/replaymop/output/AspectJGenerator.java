@@ -16,13 +16,17 @@ public class AspectJGenerator {
 		aspect = new Aspect(spec.fileName + "Aspect");
 	}
 
+	static <T> String printList(List<T> list) {
+		return list.toString().replace("[", "{").replace("]", "}");
+	}
+	
 	void generateThreadCreationOrder() {
 		aspect.setParameter("THREAD_CREATION_ORDER",
-				spec.threadOrder.toString());
+				printList(spec.threadOrder));
 	}
 
 	void generateShareVariableAccessPointCut(){
-		StringJoiner pointcuts = new StringJoiner(" ||\n");
+		StringJoiner pointcuts = new StringJoiner(" ||\n\t\t\t");
 		for (ReplaySpecification.Variable var : spec.shared){
 			pointcuts.add(String.format("set(%s %s)", var.type, var.name));
 			pointcuts.add(String.format("get(%s %s)", var.type, var.name));
@@ -31,17 +35,17 @@ public class AspectJGenerator {
 	}
 	
 	void generateBeforeSyncPointCut() {
-		StringJoiner pointcuts = new StringJoiner(" ||\n");
+		StringJoiner pointcuts = new StringJoiner(" ||\n\t\t\t");
 		if (spec.beforeMonitorEnter)
 			pointcuts.add("lock()");
 		for (String sync : spec.beforeSync){
 			pointcuts.add(String.format("call(%s)", sync));
 		}
-		aspect.setParameter("BEFORE_SYNC_POINTCUTS", pointcuts.toString());
+		aspect.setParameter("BEFORE_SYNC_POINTCUTS", pointcuts.toString() + (pointcuts.length() == 0 ? "" : " ||"));
 	}
 	
 	void generateAfterSyncPointCut() {
-		StringJoiner pointcuts = new StringJoiner(" ||\n");
+		StringJoiner pointcuts = new StringJoiner(" ||\n\t\t\t");
 		if (spec.afterMonitorExit)
 			pointcuts.add("unlock()");
 		for (String sync : spec.afterSync){
@@ -58,9 +62,9 @@ public class AspectJGenerator {
 			counts.add(unit.count);
 		}
 		aspect.setParameter("SCHEDULE_THERAD",
-				threads.toString());
+				printList(threads));
 		aspect.setParameter("SCHEDULE_COUNT",
-				counts.toString());
+				printList(counts));
 		
 	}
 

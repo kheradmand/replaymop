@@ -37,14 +37,16 @@ public aspect %NAME% {
 	
 	//pointcut sharedVarSet():  %SHARED_VAR_SET%
 	
-	pointcut shareVarAccess(): %SHARED_VAR_ACCESS% //sharedVarGet() || sharedVarSet(); 
+	pointcut shareVarAccess(): %SHARED_VAR_ACCESS%;
+	//sharedVarGet() || sharedVarSet() 
 	
 	//==============================shared var end=============================
 	
 	//===========================sync pointcut begin===========================
 	
 	
-	pointcut beforeSync(): %BEFORE_SYNC_POINTCUTS% || sharedVarAccess() ;
+	pointcut beforeSync(): %BEFORE_SYNC_POINTCUTS% 
+			sharedVarAccess() ;
 	
 	pointcut afterSync(): %AFTER_SYNC_POINTCUTS% ;
 	

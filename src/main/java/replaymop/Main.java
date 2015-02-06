@@ -34,7 +34,7 @@ public class Main {
 	public static void main(String[] args){
 		try{
 			parseArguments(args);
-			File inputFile = new File(parameters.inputFile);
+			File inputFile = new File(parameters.inputFile.get(0));
 			ReplaySpecification spec = RSParser.parse(inputFile);
 			Aspect aspect = AspectJGenerator.generate(spec);
 			File outputFile = new File(inputFile.getParent() + File.separator + aspect.name + ".aj");
