@@ -13,8 +13,10 @@ public aspect %NAME% {
 		
 	final long[] threadOrder = %THREAD_CREATION_ORDER%;
 	int threadOrderIndex = 0;
+	
+	pointcut threadCreation(): call(java.lang.Thread+.new(..));
 		
-	before(): call(java.lang.Thread+.new(*)){
+	before(): threadCreation() {
 		threadCreationLock.lock();
 		while (threadOrderIndex < threadOrder.length &&
 			 threadOrder[threadOrderIndex] != Thread.currentThread().getId()){
@@ -26,7 +28,7 @@ public aspect %NAME% {
 		}
 	}
 		
-	after(): call(java.lang.Thread+.new(*)){
+	after(): threadCreation() {
 		threadOrderIndex++;
 		threadCreated.signalAll();
 		threadCreationLock.unlock();
