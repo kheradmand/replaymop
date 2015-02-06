@@ -86,7 +86,7 @@ public aspect %NAME% {
 				schedule_count[threadScheduleIndex]--;
 				if (schedule_count[threadScheduleIndex] == 0){
 					threadScheduleIndex++;
-					this.notifyAll();
+					threadScheduleLock.notifyAll();
 				}
 			} 	
 		}
@@ -94,6 +94,23 @@ public aspect %NAME% {
 	
 	//===========================sched enforce end===========================
 
-
+	//============================debug info begin===========================
+	
+	%DEBUG_BEGIN%
+	before(): beforeSync() && !cflow(adviceexecution()) {
+		printThread();
+	}
+	
+	after(): afterSync() && !cflow(adviceexecution()){
+		printThread();
+	}
+	
+	void printThread(){
+		System.out.printf("%d sync event\n", Thread.currentThread().getId());
+	}
+	%DEBUG_END%
+	
+	
+	//============================debug info begin===========================
 
 }

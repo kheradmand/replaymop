@@ -4,15 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
+import replaymop.Parameters;
 import replaymop.output.aspectj.Aspect;
 import replaymop.parser.rs.ReplaySpecification;
 
 public class AspectJGenerator {
 	ReplaySpecification spec;
 	Aspect aspect;
+	Parameters params;
 
-	private AspectJGenerator(ReplaySpecification spec) {
+	private AspectJGenerator(ReplaySpecification spec, Parameters params) {
 		this.spec = spec;
+		this.params = params;
 		aspect = new Aspect(spec.fileName + "Aspect");
 	}
 
@@ -67,6 +70,11 @@ public class AspectJGenerator {
 				printList(counts));
 		
 	}
+	
+	void handleDebugInfo(){
+		aspect.setParameter("DEBUG_BEGIN", params.debug_runtime ? "" : "\\*");
+		aspect.setParameter("DEBUG_END", params.debug_runtime ? "" : "/*");
+	}
 
 	void startGeneration() {
 		generateThreadCreationOrder();
@@ -75,11 +83,12 @@ public class AspectJGenerator {
 		generateBeforeSyncPointCut();
 		generateAfterSyncPointCut();
 		generateThreadSchedule();
+		handleDebugInfo();
 
 	}
 
-	public static Aspect generate(ReplaySpecification spec) {
-		AspectJGenerator generator = new AspectJGenerator(spec);
+	public static Aspect generate(ReplaySpecification spec, Parameters params) {
+		AspectJGenerator generator = new AspectJGenerator(spec, params);
 		generator.startGeneration();
 		return generator.aspect;
 	}

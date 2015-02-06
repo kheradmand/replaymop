@@ -36,7 +36,7 @@ public class Main {
 			parseArguments(args);
 			File inputFile = new File(parameters.inputFile.get(0));
 			ReplaySpecification spec = RSParser.parse(inputFile);
-			Aspect aspect = AspectJGenerator.generate(spec);
+			Aspect aspect = AspectJGenerator.generate(spec, parameters);
 			File outputFile = new File(inputFile.getParent() + File.separator + aspect.name + ".aj");
 			PrintWriter writer = new PrintWriter(outputFile);
 			writer.println(aspect.toString());
