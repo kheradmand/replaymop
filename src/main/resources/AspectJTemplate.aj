@@ -1,4 +1,7 @@
-import java.util.concurrent.locks;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.Condition;
+
 
 public aspect %NAME% {
 
@@ -11,21 +14,21 @@ public aspect %NAME% {
 	final long[] threadOrder = %THREAD_CREATION_ORDER%;
 	int threadOrderIndex = 0;
 		
-	before(): call(java.lang.Thread.new(*)){
+	before(): call(java.lang.Thread+.new(*)){
 		threadCreationLock.lock();
 		while (threadOrderIndex < threadOrder.length &&
 			 threadOrder[threadOrderIndex] != Thread.currentThread().getId()){
 			try{
-				threadCreated.await()
+				threadCreated.await();
 			}catch (InterruptedException e){
 		
 			}
 		}
 	}
 		
-	after(): call(java.lang.Thread.new(*)){
-		threadOrderIndex++
-		headMatched.signalAll()
+	after(): call(java.lang.Thread+.new(*)){
+		threadOrderIndex++;
+		threadCreated.signalAll();
 		threadCreationLock.unlock();
 	}
 	
@@ -37,7 +40,7 @@ public aspect %NAME% {
 	
 	//pointcut sharedVarSet():  %SHARED_VAR_SET%
 	
-	pointcut shareVarAccess(): %SHARED_VAR_ACCESS%;
+	pointcut sharedVarAccess(): %SHARED_VAR_ACCESS%;
 	//sharedVarGet() || sharedVarSet() 
 	
 	//==============================shared var end=============================
@@ -54,7 +57,7 @@ public aspect %NAME% {
 		enforceSchedule();
 	}
 	
-	after(): afterPointcuts() &7 !cflow(adviceexecution()){
+	after(): afterSync() && !cflow(adviceexecution()){
 		enforceSchedule();
 	}
 	
