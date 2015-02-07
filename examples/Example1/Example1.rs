@@ -15,5 +15,5 @@ after_sync:
 	default
 	;
 	
-schedule: 1 x 7 , 10 x 5 , 1 x 1 , 10 x 1 ;
+schedule: 1 x 7 , 10 x 5 , 1 x 2 , 10 x 2 ;
 

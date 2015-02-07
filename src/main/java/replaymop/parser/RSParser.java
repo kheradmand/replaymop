@@ -84,6 +84,8 @@ public class RSParser {
 				spec.addBeforeSyncDefault();
 			else if (func.equals("synchronized"))
 				spec.beforeMonitorEnter = true;
+			else if (func.equals("begin"))
+				spec.beforeThreadEnd = true;
 			else if (func.equals(";"))
 				return;
 			else
@@ -100,7 +102,9 @@ public class RSParser {
 			if (func.equals("default"))
 				spec.addAfterSyncDefault();
 			else if (func.equals("synchronized"))
-				spec.afterMonitorExit = false;
+				spec.afterMonitorExit = true;
+			else if (func.equals("begin"))
+				spec.afterThreadBegin = true;
 			else if (func.equals(";"))
 				return;
 			else

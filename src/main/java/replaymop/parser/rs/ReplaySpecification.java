@@ -14,8 +14,10 @@ public class ReplaySpecification {
 	public Set<Variable> shared;
 	public Set<String> beforeSync;
 	public boolean beforeMonitorEnter = false;
+	public boolean beforeThreadEnd = false;
 	public Set<String> afterSync;
 	public boolean afterMonitorExit = false;
+	public boolean afterThreadBegin = false;
 	public List<ScheduleUnit> schedule;
 	public String input;
 	
@@ -40,11 +42,13 @@ public class ReplaySpecification {
 	
 	public void addBeforeSyncDefault(){
 		beforeMonitorEnter = true;
+		beforeThreadEnd = true;
 		beforeSync.addAll(Arrays.asList(beforeSyncDefault));
 	}
 	
 	public void addAfterSyncDefault(){
 		afterMonitorExit = true;
+		//afterThreadBegin = true;
 		afterSync.addAll(Arrays.asList(afterSyncDefault));
 		
 	}
