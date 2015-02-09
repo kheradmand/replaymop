@@ -83,13 +83,38 @@ public aspect %NAME% {
 				}
 			}
 			if (threadScheduleIndex < schedule_thread.length){
-				schedule_count[threadScheduleIndex]--;
+				if (schedule_count[threadScheduleIndex] > 0){
+					schedule_count[threadScheduleIndex]--;
+				}else{
+					threadScheduleIndex++;
+					threadScheduleLock.notifyAll();
+					//enforce context switch right before next sync event:
+					enforceSchedule();
+					//note that this function will be called recursively only once (when sched_count = 0)
+				}
+			} 	
+		}
+	}
+	
+	/* if schedule_count for current thread reaches 0, enforcer does not notify 
+	other threads until the next sync event in the current thread happens. 
+	if the user also includes thread termination as one sync event in the 
+	schedule_count, this will result in unlimited wait of other threads.
+	the following advice takes care of this situation. 
+	note that this advice should be after the sync point cut advice. 
+	TODO: capture all possible terminations of a thread. is this enough?*/
+	before(): execution(* Thread+.run()){
+		synchronized(threadScheduleLock){ 
+			long id = Thread.currentThread().getId();
+			if (threadScheduleIndex < schedule_thread.length && schedule_thread[threadScheduleIndex] == id){
 				if (schedule_count[threadScheduleIndex] == 0){
 					threadScheduleIndex++;
 					threadScheduleLock.notifyAll();
 				}
+				//TODO: what if > 0
 			} 	
-		}
+		}	
+	
 	}
 	
 	//===========================sched enforce end===========================

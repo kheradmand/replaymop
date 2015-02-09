@@ -53,9 +53,9 @@ public class Example1 {
 			{
 				x++;
 			}
-		
+			
 			x=0;//race here
-		
+			
 			t1.join();
 			
 			t2.join();
@@ -82,6 +82,7 @@ public class Example1 {
 			{
 				x++;
 			}
+
 			
 			System.out.println(1/x);//may throw divide by zero exception
 
