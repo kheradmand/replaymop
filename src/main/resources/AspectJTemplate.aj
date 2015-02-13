@@ -4,7 +4,8 @@ import java.util.concurrent.locks.Condition;
 
 
 public aspect %NAME% {
-
+	
+	pointcut entryPoint() : execution(public static void main(String[]));
 
 	//===========================thread creation begin===========================
 	
@@ -84,10 +85,12 @@ public aspect %NAME% {
 			}
 			if (threadScheduleIndex < schedule_thread.length){
 				if (schedule_count[threadScheduleIndex] > 0){
+					%DEBUG_BEGIN% System.out.println("-- " + id); %DEBUG_END%
 					schedule_count[threadScheduleIndex]--;
 				}else{
+					%DEBUG_BEGIN% System.out.println("0- " + id); %DEBUG_END%
 					threadScheduleIndex++;
-					threadScheduleLock.notifyAll();
+					threadScheduleLock.notifyAll();	
 					//enforce context switch right before next sync event:
 					enforceSchedule();
 					//note that this function will be called recursively only once (when sched_count = 0)
@@ -103,11 +106,12 @@ public aspect %NAME% {
 	the following advice takes care of this situation. 
 	note that this advice should be after the sync point cut advice. 
 	TODO: capture all possible terminations of a thread. is this enough?*/
-	before(): execution(* Thread+.run()){
+	after(): execution(* Thread+.run()){
 		synchronized(threadScheduleLock){ 
 			long id = Thread.currentThread().getId();
 			if (threadScheduleIndex < schedule_thread.length && schedule_thread[threadScheduleIndex] == id){
 				if (schedule_count[threadScheduleIndex] == 0){
+					%DEBUG_BEGIN% System.out.println("0e " + id); %DEBUG_END%
 					threadScheduleIndex++;
 					threadScheduleLock.notifyAll();
 				}
@@ -122,17 +126,17 @@ public aspect %NAME% {
 	//============================debug info begin===========================
 	
 	%DEBUG_BEGIN%
-	before(): beforeSync() && !cflow(adviceexecution()) {
-		printThread();
-	}
+	//before(): beforeSync() && !cflow(adviceexecution()) {
+	//	printThread();
+	//}
 	
-	after(): afterSync() && !cflow(adviceexecution()){
-		printThread();
-	}
+	//after(): afterSync() && !cflow(adviceexecution()){
+	//	printThread();
+	//}
 	
-	void printThread(){
-		System.out.printf("%d sync event\n", Thread.currentThread().getId());
-	}
+	//void printThread(){
+	//	System.out.printf("%d sync event\n", Thread.currentThread().getId());
+	//}
 	%DEBUG_END%
 	
 	

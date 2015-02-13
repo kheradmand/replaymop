@@ -41,8 +41,10 @@ public class AspectJGenerator {
 		StringJoiner pointcuts = new StringJoiner(" ||\n\t\t\t");
 		if (spec.beforeMonitorEnter)
 			pointcuts.add("lock()");
-		if (spec.afterThreadBegin) //trick: before run execution = after thread begin
-			pointcuts.add("execution(* Thread+.run())"); 
+		if (spec.afterThreadBegin){ //trick: before run execution = after thread begin
+			pointcuts.add("execution(* Thread+.run())");
+			pointcuts.add("entryPoint()"); //to handle the main thread
+		}
 		for (String sync : spec.beforeSync){
 			pointcuts.add(String.format("call(%s)", sync));
 		}
@@ -53,8 +55,10 @@ public class AspectJGenerator {
 		StringJoiner pointcuts = new StringJoiner(" ||\n\t\t\t");
 		if (spec.afterMonitorExit)
 			pointcuts.add("unlock()");
-		if (spec.beforeThreadEnd) //trick: after run execution = before thread end
+		if (spec.beforeThreadEnd){ //trick: after run execution = before thread end
 			pointcuts.add("execution(* Thread+.run())");
+			pointcuts.add("entryPoint()"); //to handle the main thread
+		}
 		for (String sync : spec.afterSync){
 			pointcuts.add(String.format("call(%s)", sync));
 		}
