@@ -1,0 +1,24 @@
+Here are the example tests that come with the IMUnit project <http://mir.cs.illinois.edu/imunit>.
+
+Directories:
+src: includes all the tests used here.
+Each IMUnit test is annotated with @Schedule and @Test. The original Thread.sleep() operations are not removed from the file but commented out. So, to get the original sleep test, comment out @Schedule and fireEvent, and uncomment Thread.sleep() in those IMUnit tests.
+
+lib: includes all the jars used to run IMUnit and the test programs.
+
+Files:
+build.xml: ant script used to build all the tests. Class files will be produced under bin.
+
+imunit.sh: bash script used to run the IMUnit tests.
+
+LICENSE: our license file for the IMUnit project.
+
+Instructions:
+
+To build or clean all the tests, use "ant" or "ant clean".
+
+To run a single IMUnit test, use "./imunit.sh test_class_name", e.g., "./imunit.sh edu.illinois.imunit.examples.jbosscache.ReadWriteLockWithUpgradeTest".
+
+To run all the IMUnit tests, use "./imunit.sh all".
+
+If you have any questions, feel free to contact Qingzhou Luo <qluo2@illinois.edu>.
