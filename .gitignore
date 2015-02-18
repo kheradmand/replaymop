@@ -3,3 +3,7 @@
 .classpath
 .project
 *.class
+
+#temp
+examples/rv-predict-old
+examples/rv-predict
