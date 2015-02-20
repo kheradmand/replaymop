@@ -118,7 +118,7 @@ public class Tester {
 		ProcessBuilder processsBuilder = new ProcessBuilder(command);
 		processsBuilder.directory(pathFile);
 
-		if (inputFile.exists() && inputFile.isFile())
+		if (inputFile!= null && inputFile.exists() && inputFile.isFile())
 			processsBuilder.redirectInput(inputFile);
 		else
 			processsBuilder.redirectInput(Redirect.INHERIT);
@@ -131,6 +131,10 @@ public class Tester {
 		int ret = process.waitFor();
 
 		return ret;
+	}
+	
+	public int runCommandInternally(String... command) throws IOException, InterruptedException {
+		return runCommand(null, Redirect.INHERIT.file(), Redirect.INHERIT.file());
 	}
 
 }
