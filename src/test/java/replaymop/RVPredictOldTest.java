@@ -29,12 +29,14 @@ public class RVPredictOldTest {
 	
 	@Test
 	public void test() throws Exception{
+		//TODO: use FileUtils as much as possible
 		tester.runCommandInternally("mkdir bin");
-		tester.runCommandInternally("mkdir javac *.java -d bin");
+		tester.runCommandInternally("javac *.java -d bin");
 		tester.testOutputConsistency(entryPoint, 100, true, "java", "-cp bin", folder+"."+entryPoint, input);
 		tester.runCommandInternally("rm -rf bin");
 		tester.runCommandInternally("rm *.expected.out");
 		tester.runCommandInternally("rm *.expected.err");
+		
 	}
 	
 	
@@ -43,7 +45,7 @@ public class RVPredictOldTest {
 	@Parameters(name = "{0}")
 	public static Collection<Object[]> data() {
         ArrayList<Object[]> data = new ArrayList<Object[]>();
-        
+        data.add(new Object[]{"account", "Main", ""});
         return data;
 	};
 }
