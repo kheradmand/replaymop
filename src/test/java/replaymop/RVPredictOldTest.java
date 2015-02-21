@@ -35,7 +35,7 @@ public class RVPredictOldTest {
 
 	@Test
 	public void test() throws Exception {
-		System.out.println("testing " + folder + "." + entryPoint);
+		System.out.println("\ntesting " + folder + "." + entryPoint);
 		
 		//create bin
 		File bin = new File(workindDir + File.separator + "bin");
