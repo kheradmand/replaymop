@@ -27,8 +27,8 @@ public class Tester {
 		Assert.assertEquals(ret, 0);
 		if (inspectStdErr) {
 			long id = Thread.currentThread().getId();
-			File errorFile = new File(path + File.pathSeparator + prefix + id
-					+ "actual.err");
+			File errorFile = new File(path + File.separator + prefix + id
+					+ ".actual.err");
 			Assert.assertEquals(errorFile.length(), 0);
 		}
 	}
@@ -38,77 +38,83 @@ public class Tester {
 		int ret = runCommand(prefix, command);
 		if (inspectSuccess)
 			Assert.assertEquals(ret, 0);
-		
+
 		long id = Thread.currentThread().getId();
-		File actualOutputFile = new File(path + File.pathSeparator + prefix
-				+ id + "actual.out");
-		File actualErrorFile = new File(path + File.pathSeparator + prefix + id
-				+ "actual.err");
-		File expectedOutputFile = new File(path + File.pathSeparator + prefix
-				 + "expected.out");
-		File expectedErrorFile = new File(path + File.pathSeparator + prefix
-				 + "expected.err");
-		
+		File actualOutputFile = new File(path + File.separator + prefix + id
+				+ ".actual.out");
+		File actualErrorFile = new File(path + File.separator + prefix + id
+				+ ".actual.err");
+		File expectedOutputFile = new File(path + File.separator + prefix
+				+ ".expected.out");
+		File expectedErrorFile = new File(path + File.separator + prefix
+				+ ".expected.err");
+
 		Assert.assertTrue(FileUtils.contentEquals(actualOutputFile,
 				expectedOutputFile));
 		Assert.assertTrue(FileUtils.contentEquals(actualErrorFile,
 				expectedErrorFile));
 
 	}
-	
-	public void testOutputConsistency(String prefix, int numOfRuns, final boolean inspectSuccess, final String... command) throws Exception{
-		
-		File srcInputFile = new File(path + File.pathSeparator + prefix + ".in");
-		File targetInputFile = new File(path + File.pathSeparator + "consistency-test" + ".in");		
-		FileUtils.copyFile(srcInputFile, targetInputFile);
-		
+
+	public void testOutputConsistency(String prefix, int numOfRuns,
+			final boolean inspectSuccess, final String... command)
+			throws Exception {
+
+		File srcInputFile = new File(path + File.separator + prefix + ".in");
+		File targetInputFile = new File(path + File.separator
+				+ "consistency-test" + ".in");
+		if (srcInputFile != null && srcInputFile.exists()
+				&& srcInputFile.isFile())
+			FileUtils.copyFile(srcInputFile, targetInputFile);
+
 		prefix = "consistency-test";
-		
+
 		runCommand(prefix, command);
-		
+
 		long id = Thread.currentThread().getId();
-		File actualOutputFile = new File(path + File.pathSeparator + prefix
-				+ id + "actual.out");
-		File actualErrorFile = new File(path + File.pathSeparator + prefix + id
-				+ "actual.err");
-		File expectedOutputFile = new File(path + File.pathSeparator + prefix
-				 + "expected.out");
-		File expectedErrorFile = new File(path + File.pathSeparator + prefix
-				 + "expected.err");
-		
+		File actualOutputFile = new File(path + File.separator + prefix + id
+				+ ".actual.out");
+		File actualErrorFile = new File(path + File.separator + prefix + id
+				+ ".actual.err");
+		File expectedOutputFile = new File(path + File.separator + prefix
+				+ ".expected.out");
+		File expectedErrorFile = new File(path + File.separator + prefix
+				+ ".expected.err");
+
 		FileUtils.moveFile(actualOutputFile, expectedOutputFile);
 		FileUtils.moveFile(actualErrorFile, expectedErrorFile);
-		
+
 		ExecutorService pool = Executors.newFixedThreadPool(10);
-		
+
 		Future[] future = new Future[numOfRuns];
+
+		for (int i = 0; i < numOfRuns; i++) {
+			future[i] = pool.submit(new Callable<Void>() {
+				@Override
+				public Void call() throws Exception {
+					System.out.print(".");
+					testOutput("consistency-test", inspectSuccess, command);
+					return null;
+				}
+			});
+		}
+		pool.shutdown();
+		for (int i = 0; i < numOfRuns; i++)
+			future[i].get();
 		
-        for (int i = 0; i < numOfRuns; i++) {
-            future[i] = pool.submit(new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                       testOutput("consistency-test", inspectSuccess, command);
-                       return null;
-                }
-            });
-        }
-        pool.shutdown();
-        for (int i = 0; i < numOfRuns; i++) 
-        	future[i].get();
-		
-		
-		
+		System.out.print("\n");
+
 	}
 
 	public int runCommand(String prefix, String... command) throws IOException,
 			InterruptedException {
 		long id = Thread.currentThread().getId();
 
-		File inputFile = new File(path + File.pathSeparator + prefix + ".in");
-		File outputFile = new File(path + File.pathSeparator + prefix + id
-				+ "actual.out");
-		File errorFile = new File(path + File.pathSeparator + prefix + id
-				+ "actual.err");
+		File inputFile = new File(path + File.separator + prefix + ".in");
+		File outputFile = new File(path + File.separator + prefix + id
+				+ ".actual.out");
+		File errorFile = new File(path + File.separator + prefix + id
+				+ ".actual.err");
 
 		return runCommand(inputFile, outputFile, errorFile, command);
 	}
@@ -118,13 +124,20 @@ public class Tester {
 		ProcessBuilder processsBuilder = new ProcessBuilder(command);
 		processsBuilder.directory(pathFile);
 
-		if (inputFile!= null && inputFile.exists() && inputFile.isFile())
+		if (inputFile != null && inputFile.exists() && inputFile.isFile())
 			processsBuilder.redirectInput(inputFile);
 		else
 			processsBuilder.redirectInput(Redirect.INHERIT);
 
-		processsBuilder.redirectOutput(outputFile);
-		processsBuilder.redirectError(errorFile);
+		if (outputFile != null)
+			processsBuilder.redirectOutput(outputFile);
+		else
+			processsBuilder.redirectOutput(Redirect.INHERIT);
+
+		if (errorFile != null)
+			processsBuilder.redirectError(errorFile);
+		else
+			processsBuilder.redirectError(Redirect.INHERIT);
 
 		Process process = processsBuilder.start();
 
@@ -132,9 +145,10 @@ public class Tester {
 
 		return ret;
 	}
-	
-	public int runCommandInternally(String... command) throws IOException, InterruptedException {
-		return runCommand(null, Redirect.INHERIT.file(), Redirect.INHERIT.file());
+
+	public int runCommandInternally(String... command) throws IOException,
+			InterruptedException {
+		return runCommand(null, null, null, command);
 	}
 
 }

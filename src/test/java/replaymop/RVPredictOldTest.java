@@ -2,7 +2,10 @@ package replaymop;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.StringJoiner;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
@@ -12,40 +15,59 @@ import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
 public class RVPredictOldTest {
-	private static String basePath = System.getProperty("REPLAYMOP_HOME") + File.separator + "examples" + File.separator + "rv-predicd-old";
-	
+	private static String basePath = System.getenv("REPLAYMOP_HOME")
+			+ File.separator + "examples" + File.separator + "rv-predict-old";
+
 	Tester tester;
-	
+
 	String folder;
 	String entryPoint;
 	String input;
-	
-	RVPredictOldTest(String folder, String entryPoint, String input){
+	String workindDir;
+
+	public RVPredictOldTest(String folder, String entryPoint, String input) {
 		this.folder = folder;
 		this.entryPoint = entryPoint;
 		this.input = input;
-		tester = new Tester(basePath + File.separator + folder);
+		this.workindDir = basePath + File.separator + folder;
+		tester = new Tester(workindDir);
 	}
-	
+
 	@Test
-	public void test() throws Exception{
-		//TODO: use FileUtils as much as possible
-		tester.runCommandInternally("mkdir bin");
-		tester.runCommandInternally("javac *.java -d bin");
-		tester.testOutputConsistency(entryPoint, 100, true, "java", "-cp bin", folder+"."+entryPoint, input);
-		tester.runCommandInternally("rm -rf bin");
-		tester.runCommandInternally("rm *.expected.out");
-		tester.runCommandInternally("rm *.expected.err");
+	public void test() throws Exception {
+		System.out.println("testing " + folder + "." + entryPoint);
 		
+		//create bin
+		File bin = new File(workindDir + File.separator + "bin");
+		FileUtils.forceMkdir(bin);
+		
+		//compile *.java to bin
+		List<String> compile = new ArrayList<>();
+		compile.add("javac");
+		compile.add("-d");
+		compile.add("bin");
+		FileUtils.listFiles(new File(workindDir), new String[] { "java" },
+				false).forEach(f -> compile.add(f.getName()));
+		tester.runCommandInternally(compile.toArray(new String[compile.size()]));
+		
+		//test command
+		//TODO: implement better input (maybe)
+		tester.testOutputConsistency(entryPoint, 100, true, "java", "-cp",
+				"bin", folder + "." + entryPoint, input);
+		tester.runCommandInternally("java", "-cp", "bin", folder + "." + entryPoint, input);
+		
+		//remove bin + .out + .err 
+		FileUtils.forceDelete(bin);
+		FileUtils.listFiles(new File(workindDir),
+				new String[] { "out", "err" }, false).forEach(
+				f -> f.delete());
+
 	}
-	
-	
-	
-	
+
 	@Parameters(name = "{0}")
 	public static Collection<Object[]> data() {
-        ArrayList<Object[]> data = new ArrayList<Object[]>();
-        data.add(new Object[]{"account", "Main", ""});
-        return data;
+		ArrayList<Object[]> data = new ArrayList<Object[]>();
+		data.add(new Object[] { "account", "Main", "/dev/null" });
+		return data;
 	};
 }
