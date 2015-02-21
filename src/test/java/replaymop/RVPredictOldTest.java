@@ -15,7 +15,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
 public class RVPredictOldTest {
-	private static String basePath = System.getenv("REPLAYMOP_HOME")
+	private static String basePath = System.getProperty("user.dir")
 			+ File.separator + "examples" + File.separator + "rv-predict-old";
 
 	Tester tester;
@@ -54,7 +54,7 @@ public class RVPredictOldTest {
 		//TODO: implement better input (maybe)
 		tester.testOutputConsistency(entryPoint, 100, true, "java", "-cp",
 				"bin", folder + "." + entryPoint, input);
-		tester.runCommandInternally("java", "-cp", "bin", folder + "." + entryPoint, input);
+		//tester.runCommandInternally("java", "-cp", "bin", folder + "." + entryPoint, input);
 		
 		//remove bin + .out + .err 
 		FileUtils.forceDelete(bin);
