@@ -1,6 +1,7 @@
 *.actual.out
 *.actual.err
 **/bin
+/file/tmp
 
 #temp
 *.expected.out

@@ -92,6 +92,8 @@ public class RVPredictOldTest {
 		data.add(new Object[] { "singleton", "Main", "" });
 		data.add(new Object[] { "subtle", "MyThread", "" });
 		data.add(new Object[] { "tsp", "Tsp", basePath + File.separator + "tsp" + File.separator + "tspfiles" + File.separator + "map4", 2 });
+		data.add(new Object[] { "unsafejoin", "Simple", "" });
+		data.add(new Object[] { "wait", "Simple", "" });
 		return data;
 	};
 }
