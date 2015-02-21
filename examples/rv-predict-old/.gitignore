@@ -1,0 +1,7 @@
+*.actual.out
+*.actual.err
+**/bin
+
+#temp
+*.expected.out
+*.expected.err

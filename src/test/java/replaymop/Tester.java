@@ -7,6 +7,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
@@ -53,6 +54,9 @@ public class Tester {
 				expectedOutputFile));
 		Assert.assertTrue(FileUtils.contentEquals(actualErrorFile,
 				expectedErrorFile));
+		
+		actualOutputFile.delete();
+		actualErrorFile.delete();
 
 	}
 
@@ -141,9 +145,13 @@ public class Tester {
 
 		Process process = processsBuilder.start();
 
-		int ret = process.waitFor();
-
-		return ret;
+		if (process.waitFor(5, TimeUnit.SECONDS))
+				return process.waitFor();
+		else{
+			process.destroyForcibly();
+			throw new InterruptedException("Time limit expired, probabely due to deadlock");
+		}
+		
 	}
 
 	public int runCommandInternally(String... command) throws IOException,

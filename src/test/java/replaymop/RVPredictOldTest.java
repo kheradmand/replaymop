@@ -68,6 +68,30 @@ public class RVPredictOldTest {
 	public static Collection<Object[]> data() {
 		ArrayList<Object[]> data = new ArrayList<Object[]>();
 		data.add(new Object[] { "account", "Main", "/dev/null" });
+		data.add(new Object[] { "cdep", "Main", "" });
+		data.add(new Object[] { "constructor", "Simple", "" });
+		data.add(new Object[] { "elevator", "Elevator", "" });
+		data.add(new Object[] { "emptyfor", "Main", "" });
+		data.add(new Object[] { "ex", "Foo", "" });
+		data.add(new Object[] { "file", "File", "" });
+		data.add(new Object[] { "finalvar", "Main", "" });
+		data.add(new Object[] { "finalvar2", "Main", "" });
+		data.add(new Object[] { "finalvar3", "Main", "" });
+		data.add(new Object[] { "finalvar4", "Main", "" });
+		data.add(new Object[] { "huge", "Main", "NumberOfEvents" });
+		data.add(new Object[] { "huge", "Main", "NumberOfEvents2" });
+		data.add(new Object[] { "huge", "Loop", "" });
+		data.add(new Object[] { "impure", "Simple", "" });
+		data.add(new Object[] { "innerclass", "Simple", "" });
+		data.add(new Object[] { "joinsimple", "Simple", "" });
+		data.add(new Object[] { "mixedlockshuge", "Main", "" });
+		data.add(new Object[] { "pseudosafecdep", "Main", "" });
+		data.add(new Object[] { "safesimple", "Simple", "" });
+		data.add(new Object[] { "safewait", "Simple", "" });
+		data.add(new Object[] { "simple", "Simple", "" });
+		data.add(new Object[] { "singleton", "Main", "" });
+		data.add(new Object[] { "subtle", "MyThread", "" });
+		data.add(new Object[] { "tsp", "Tsp", basePath + File.separator + "tsp" + File.separator + "tspfiles" + File.separator + "map4", 2 });
 		return data;
 	};
 }
