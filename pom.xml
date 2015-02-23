@@ -44,6 +44,7 @@
 				<configuration>
 					<includes>
 						<include>**/RVPredictOldTest.java</include>
+						<include>**/BasicTest.java</include>
 					</includes>
 
 				</configuration>
