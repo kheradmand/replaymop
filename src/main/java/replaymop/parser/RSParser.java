@@ -9,18 +9,24 @@ import java.util.Scanner;
 import javax.swing.text.html.HTMLDocument.HTMLReader.SpecialAction;
 
 import replaymop.ReplayMOPException;
-import replaymop.parser.rs.ReplaySpecification;
+import replaymop.replayspecification.ReplaySpecification;
+import replaymop.replayspecification.ScheduleUnit;
+import replaymop.replayspecification.Variable;
 
-public class RSParser {
+public class RSParser extends Parser {
 
-	ReplaySpecification spec;
+	
 	Scanner input;
+	
 
 	boolean threadsDefined = false;
 
-	private RSParser(File inputFile) throws FileNotFoundException {
+	public RSParser(File inputFile) throws Exception {
+		if (!inputFile.getName().endsWith(".rs"))
+			throw new Exception("expecting .rs file");
 		input = new Scanner(inputFile);
 		spec = new ReplaySpecification();
+		this.spec.fileName = inputFile.getName().replace(".rs", "");
 	}
 
 	void handleThreads() throws ReplayMOPException {
@@ -58,10 +64,10 @@ public class RSParser {
 	void handleShared() throws ReplayMOPException {
 
 		while (input.hasNext()) {
-			ReplaySpecification.Variable shared = new ReplaySpecification.Variable();
+			Variable shared = new Variable();
 			shared.type = input.next();
 			if (shared.type.equals("all"))
-				//spec.allShared = true;
+				// spec.allShared = true;
 				throw new ReplayMOPException("all: not supported yet");
 			else
 				shared.name = input.next();
@@ -117,7 +123,7 @@ public class RSParser {
 	void handleSchedule() throws ReplayMOPException {
 
 		while (input.hasNext()) {
-			ReplaySpecification.ScheduleUnit unit = new ReplaySpecification.ScheduleUnit();
+			ScheduleUnit unit = new ScheduleUnit();
 			unit.thread = input.nextLong();
 			if (!spec.threads.contains(unit.thread))
 				throw new ReplayMOPException("thread id undefined");
@@ -134,12 +140,13 @@ public class RSParser {
 		}
 		throw new ReplayMOPException("expected ;");
 	}
-	
+
 	void handleInput() {
 		spec.input += input.nextLine() + "\n";
 	}
-
-	private void startParsing() throws ReplayMOPException {
+	
+	@Override
+	protected void startParsing() throws ReplayMOPException {
 		while (input.hasNext()) {
 			String section = input.next();
 			switch (section) {
@@ -168,20 +175,8 @@ public class RSParser {
 				throw new ReplayMOPException("unrecognized keyword");
 			}
 		}
+		alreadyParsed = true;
 	}
 
-	public static ReplaySpecification parse(File inputFile)
-			throws FileNotFoundException, Exception {
-		if (!inputFile.getName().endsWith(".rs"))
-			throw new Exception("expecting .rs file");
-		RSParser parser = new RSParser(inputFile);
-		parser.spec.fileName = inputFile.getName().replace(".rs", "");
-		try {
-			parser.startParsing();
-		} catch (ReplayMOPException re) {
-			re.printStackTrace();
-			return null;
-		}
-		return parser.spec;
-	}
+
 }

@@ -6,7 +6,8 @@ import java.util.StringJoiner;
 
 import replaymop.Parameters;
 import replaymop.output.aspectj.Aspect;
-import replaymop.parser.rs.ReplaySpecification;
+import replaymop.replayspecification.ReplaySpecification;
+import replaymop.replayspecification.ScheduleUnit;
 
 public class AspectJGenerator {
 	ReplaySpecification spec;
@@ -30,7 +31,7 @@ public class AspectJGenerator {
 
 	void generateShareVariableAccessPointCut(){
 		StringJoiner pointcuts = new StringJoiner(" ||\n\t\t\t");
-		for (ReplaySpecification.Variable var : spec.shared){
+		for (replaymop.replayspecification.Variable var : spec.shared){
 			pointcuts.add(String.format("set(%s %s)", var.type, var.name));
 			pointcuts.add(String.format("get(%s %s)", var.type, var.name));
 		}
@@ -68,7 +69,7 @@ public class AspectJGenerator {
 	void generateThreadSchedule() {
 		List<Long> threads = new ArrayList<>();
 		List<Integer> counts = new ArrayList<>();
-		for (ReplaySpecification.ScheduleUnit unit : spec.schedule){
+		for (ScheduleUnit unit : spec.schedule){
 			threads.add(unit.thread);
 			counts.add(unit.count);
 		}

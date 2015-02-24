@@ -1,4 +1,4 @@
-package replaymop.parser.rs;
+package replaymop.replayspecification;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,10 +34,10 @@ public class ReplaySpecification {
 	public ReplaySpecification() {
 		threads = new HashSet<Long>();
 		threadOrder = new ArrayList<Long>();
-		shared = new HashSet<ReplaySpecification.Variable>();
+		shared = new HashSet<Variable>();
 		beforeSync = new HashSet<String>();
 		afterSync = new HashSet<String>();
-		schedule = new ArrayList<ReplaySpecification.ScheduleUnit>();
+		schedule = new ArrayList<ScheduleUnit>();
 	}
 	
 	public void addBeforeSyncDefault(){
@@ -53,14 +53,6 @@ public class ReplaySpecification {
 		
 	}
 	
-	public static class Variable{
-		public String type;
-		public String name;
-	}
-	
-	public static class ScheduleUnit{
-		public Long thread;
-		public int count;
-	}
+
 	
 }
