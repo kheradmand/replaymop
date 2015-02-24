@@ -48,14 +48,15 @@
 
 				<configuration>
 					<includes>
-						<include>**/RVPredictOldTest.java</include>
-						<include>**/BasicTest.java</include>
+						<include>**/RVPredictOldIT.java</include>
+						<include>**/BasicIT.java</include>
 					</includes>
 
 				</configuration>
 				<executions>
 					<execution>
 						<goals>
+							<goal>integration-test</goal>
 							<goal>verify</goal>
 						</goals>
 					</execution>

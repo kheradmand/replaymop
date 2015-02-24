@@ -14,7 +14,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
-public class RVPredictOldTest {
+public class RVPredictOldIT {
 	private static String basePath = System.getProperty("user.dir")
 			+ File.separator + "examples" + File.separator + "rv-predict-old";
 
@@ -25,7 +25,7 @@ public class RVPredictOldTest {
 	String input;
 	String workindDir;
 
-	public RVPredictOldTest(String folder, String entryPoint, String input) {
+	public RVPredictOldIT(String folder, String entryPoint, String input) {
 		this.folder = folder;
 		this.entryPoint = entryPoint;
 		this.input = input;

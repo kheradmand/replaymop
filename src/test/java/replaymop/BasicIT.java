@@ -14,7 +14,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
-public class BasicTest {
+public class BasicIT {
 	private static String basePath = System.getProperty("user.dir")
 			+ File.separator + "examples" + File.separator + "basic";
 
@@ -25,7 +25,7 @@ public class BasicTest {
 	String input;
 	String workindDir;
 
-	public BasicTest(String folder, String entryPoint, String input) {
+	public BasicIT(String folder, String entryPoint, String input) {
 		this.folder = folder;
 		this.entryPoint = entryPoint;
 		this.input = input;
