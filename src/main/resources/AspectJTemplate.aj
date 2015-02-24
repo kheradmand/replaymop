@@ -31,6 +31,10 @@ public aspect %NAME% {
 		
 	after(): threadCreation() {
 		threadOrderIndex++;
+		%DEBUG_BEGIN%
+		if (threadOrderIndex == threadOrder.length)
+			System.out.println("thread creation order enforcement completed, no enforcement anymore");
+		%DEBUG_END%
 		threadCreated.signalAll();
 		threadCreationLock.unlock();
 	}
@@ -89,8 +93,7 @@ public aspect %NAME% {
 					schedule_count[threadScheduleIndex]--;
 				}else{
 					%DEBUG_BEGIN% System.out.println("0- " + id); %DEBUG_END%
-					threadScheduleIndex++;
-					threadScheduleLock.notifyAll();	
+					incrementSchedIndexAndNotifyAll();
 					//enforce context switch right before next sync event:
 					enforceSchedule();
 					//note that this function will be called recursively only once (when sched_count = 0)
@@ -111,14 +114,24 @@ public aspect %NAME% {
 			long id = Thread.currentThread().getId();
 			if (threadScheduleIndex < schedule_thread.length && schedule_thread[threadScheduleIndex] == id){
 				if (schedule_count[threadScheduleIndex] == 0){
-					%DEBUG_BEGIN% System.out.println("0e " + id); %DEBUG_END%
-					threadScheduleIndex++;
-					threadScheduleLock.notifyAll();
+					%DEBUG_BEGIN%
+					System.out.println("0e " + id);
+					%DEBUG_END%
+					incrementSchedIndexAndNotifyAll();
 				}
 				//TODO: what if > 0
 			} 	
 		}	
 	
+	}
+	
+	private void incrementSchedIndexAndNotifyAll(){
+		threadScheduleIndex++;
+		%DEBUG_BEGIN%
+		if (threadScheduleIndex == schedule_thread.length)
+			System.out.println("thread schedule order enforcement completed, no enforcement anymore");
+		%DEBUG_END%
+		threadScheduleLock.notifyAll();
 	}
 	
 	//===========================sched enforce end===========================
