@@ -2,9 +2,13 @@ package replaymop.replayspecification;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ReplaySpecification {
 	public String fileName;
@@ -52,6 +56,32 @@ public class ReplaySpecification {
 		afterSync.addAll(Arrays.asList(afterSyncDefault));
 		
 	}
+	
+	@Override
+	public String toString() {
+		String ret = "";
+		if (!threads.isEmpty())
+			ret += "threads: " + joined(threads, " , ") + ";\n\n";
+		
+		if (!threadOrder.isEmpty())
+			ret+= "thread_creation_order: " + joined(threadOrder, " , ") + ";\n\n";
+		
+		if (!shared.isEmpty())
+			ret += "shared:\n" + joined(shared, " ,\n") + ";\n\n";
+		
+		if (!schedule.isEmpty())
+			ret += "schedule:\n" + joined(schedule, " , ") + ";\n\n";
+		
+		//TODO: also print after_sync and before_sync
+		
+		return ret;
+	}
+	
+	
+	<T> String joined(Collection<T> collection, String delim){
+		return collection.stream().map(i -> i.toString()).collect(Collectors.joining(delim));
+	}
+	
 	
 
 	

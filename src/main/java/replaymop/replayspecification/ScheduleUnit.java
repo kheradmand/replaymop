@@ -6,4 +6,9 @@ public class ScheduleUnit {
 
 	public ScheduleUnit() {
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("%d x %d", thread, count);
+	}
 }

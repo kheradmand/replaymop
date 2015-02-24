@@ -6,4 +6,9 @@ public class Variable {
 
 	public Variable() {
 	}
+	
+	@Override
+	public String toString() {
+		return ((type == null || type == "") ? "*" : type) + " " + name;
+	}
 }
