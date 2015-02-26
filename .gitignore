@@ -4,3 +4,4 @@
 .project
 *.class
 *.DS_Store
+/deploy-rv-predict.sh
