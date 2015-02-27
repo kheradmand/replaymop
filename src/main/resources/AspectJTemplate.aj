@@ -109,7 +109,7 @@ public aspect %NAME% {
 	the following advice takes care of this situation. 
 	note that this advice should be after the sync point cut advice. 
 	TODO: capture all possible terminations of a thread. is this enough?*/
-	after(): execution(* Thread+.run()){
+	after(): execution(* Thread+.run()) || entryPoint{
 		synchronized(threadScheduleLock){ 
 			long id = Thread.currentThread().getId();
 			if (threadScheduleIndex < schedule_thread.length && schedule_thread[threadScheduleIndex] == id){
