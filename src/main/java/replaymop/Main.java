@@ -7,6 +7,7 @@ import replaymop.output.AspectJGenerator;
 import replaymop.output.aspectj.Aspect;
 import replaymop.parser.Parser;
 import replaymop.parser.RSParser;
+import replaymop.parser.RVPredictLogParser;
 import replaymop.replayspecification.ReplaySpecification;
 
 import com.beust.jcommander.JCommander;
@@ -36,7 +37,7 @@ public class Main {
 		try{
 			parseArguments(args);
 			File inputFile = new File(parameters.inputFile.get(0));
-			Parser parser = new RSParser(inputFile);
+			Parser parser = (parameters.rv_trace ? new RVPredictLogParser(inputFile) : new RSParser(inputFile));
 			ReplaySpecification spec = parser.parse();
 			Aspect aspect = AspectJGenerator.generate(spec, parameters);
 			File outputFile = new File(inputFile.getParent() + File.separator + aspect.name + ".aj");

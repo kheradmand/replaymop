@@ -61,16 +61,16 @@ public class ReplaySpecification {
 	public String toString() {
 		String ret = "";
 		if (!threads.isEmpty())
-			ret += "threads: " + joined(threads, " , ") + ";\n\n";
+			ret += "threads: " + joined(threads, " , ") + " ;\n\n";
 		
 		if (!threadOrder.isEmpty())
-			ret+= "thread_creation_order: " + joined(threadOrder, " , ") + ";\n\n";
+			ret+= "thread_creation_order: " + joined(threadOrder, " , ") + " ;\n\n";
 		
 		if (!shared.isEmpty())
-			ret += "shared:\n" + joined(shared, " ,\n") + ";\n\n";
+			ret += "shared:\n" + joined(shared, " ,\n") + "\n;\n\n";
 		
 		if (!schedule.isEmpty())
-			ret += "schedule:\n" + joined(schedule, " , ") + ";\n\n";
+			ret += "schedule:\n" + joined(schedule, " , ") + " ;\n\n";
 		
 		//TODO: also print after_sync and before_sync
 		

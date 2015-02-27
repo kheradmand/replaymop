@@ -1,13 +1,19 @@
 package replaymop.parser;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
 import com.runtimeverification.rvpredict.config.Configuration;
 import com.runtimeverification.rvpredict.log.EventItem;
 import com.runtimeverification.rvpredict.log.OfflineLoggingFactory;
@@ -17,6 +23,7 @@ import com.runtimeverification.rvpredict.trace.EventUtils;
 import com.runtimeverification.rvpredict.trace.MemoryAccessEvent;
 import com.runtimeverification.rvpredict.trace.TraceCache;
 
+import replaymop.Parameters;
 import replaymop.ReplayMOPException;
 import replaymop.replayspecification.ReplaySpecification;
 import replaymop.replayspecification.ScheduleUnit;
@@ -36,6 +43,8 @@ public class RVPredictLogParser extends Parser {
 		config.outdir = logFolder.toString();
 		metaData = new OfflineLoggingFactory(config);
 		trace = new TraceCache(metaData);
+		this.spec = new ReplaySpecification();
+		spec.fileName = logFolder.getName().toUpperCase();
 		initSpec();
 
 		for (int i = 1; metaData.getVarSig(i) != null; i++)
@@ -46,7 +55,6 @@ public class RVPredictLogParser extends Parser {
 
 	private void initSpec() {
 		// TODO: sharedvars, threads
-		this.spec = new ReplaySpecification();
 		spec.addAfterSyncDefault();
 		spec.addBeforeSyncDefault();
 	}
@@ -106,8 +114,7 @@ public class RVPredictLogParser extends Parser {
 					locIdThreadAccessSet.get(loc).add(event.getTID());
 				}
 
-				System.out.println(eventItem.ADDRL + " " + eventItem.ADDRR);
-				System.out.println(event);
+				System.out.println(spec.schedule.get(spec.schedule.size() - 1).count + ": " + event + " " + metaData.getStmtSig(event.getID()) + "\t" + eventItem.ADDRL + " " + eventItem.ADDRR);
 				// TODO: schedule, thread creation order
 			}
 		} catch (Exception e) {
@@ -147,10 +154,50 @@ public class RVPredictLogParser extends Parser {
 		// shared vars
 		// thread numbers
 	}
+	
+	static class Parameters{
+		@Parameter(description = "Trace folder")
+		public List<String> inputFolder;
+		
+		@Parameter(names = "-output", description = "Output directory")
+		public String outputFolder;
+	}
 
-	static public void main(String[] args) {
-		Parser parser = new RVPredictLogParser(new File(args[0]));
-		parser.parse();
+	static public void main(String[] args) throws IOException {
+		
+		
+		
+		Parameters parameters = new Parameters();
+		JCommander parameterParser;
+		try{
+			parameterParser = new JCommander(parameters, args);
+		}catch (ParameterException pe){
+			System.err.println(pe.getMessage());
+			return;
+		}
+		if (parameters.inputFolder == null || !(new File(parameters.inputFolder.get(0))).isDirectory()){
+			parameterParser.usage();
+			System.exit(1);
+		}
+		
+		if (parameters.outputFolder == null)
+			parameters.outputFolder=parameters.inputFolder.get(0);
+		
+		File inputFolder = new File(parameters.inputFolder.get(0));
+		
+		Parser parser = new RVPredictLogParser(inputFolder);
+		ReplaySpecification spec = parser.parse();
+		
+		File outputFile = new File(inputFolder + File.separator + spec.fileName + ".rs");
+		
+		FileWriter out = new FileWriter(outputFile);
+		out.write(spec.toString());
+		
+		out.close();
+		
+		
+		
+		
 	}
 
 }
