@@ -36,6 +36,7 @@ public class RVPredictLogParser extends Parser {
 
 	Map<Integer, Set<Long>> locIdThreadAccessSet = new HashMap<Integer, Set<Long>>();
 	// distinguish array and and non array
+	Map<Integer, Set<ScheduleUnit>> locIdinSchedUnit = new HashMap<Integer, Set<ScheduleUnit>>();
 	Set<Long> threads = new TreeSet<Long>();
 
 	public RVPredictLogParser(File logFolder) {
@@ -81,11 +82,11 @@ public class RVPredictLogParser extends Parser {
 			return false;
 		}
 	}
-	
-	
-	void addEventToSchedule(Long eventThread){
+
+	void addEventToSchedule(Long eventThread) {
 		int lastIndex = spec.schedule.size() - 1;
-		if (spec.schedule.isEmpty() || spec.schedule.get(lastIndex).thread != eventThread)
+		if (spec.schedule.isEmpty()
+				|| spec.schedule.get(lastIndex).thread != eventThread)
 			spec.schedule.add(new ScheduleUnit(eventThread, 1));
 		else
 			spec.schedule.get(lastIndex).count++;
@@ -100,11 +101,10 @@ public class RVPredictLogParser extends Parser {
 				EventType eventType = event.getType();
 
 				threads.add(event.getTID());
-				
 
 				if (!important(eventType))
 					continue;
-				
+
 				addEventToSchedule(event.getTID());
 
 				if (event instanceof MemoryAccessEvent) {
@@ -112,9 +112,20 @@ public class RVPredictLogParser extends Parser {
 					if (!locIdThreadAccessSet.keySet().contains(loc))
 						locIdThreadAccessSet.put(loc, new HashSet<Long>());
 					locIdThreadAccessSet.get(loc).add(event.getTID());
+					if (locIdinSchedUnit.get(loc) == null)
+						locIdinSchedUnit.put(loc, new HashSet<ScheduleUnit>());
+					locIdinSchedUnit.get(loc).add(
+							spec.schedule.get(spec.schedule.size() - 1));
 				}
 
-				System.out.println(spec.schedule.get(spec.schedule.size() - 1).count + ": " + event + " " + metaData.getStmtSig(event.getID()) + "\t" + eventItem.ADDRL + " " + eventItem.ADDRR);
+				System.out
+						.println(spec.schedule.get(spec.schedule.size() - 1).count
+								+ ": "
+								+ event
+								+ " "
+								+ metaData.getStmtSig(event.getID())
+								+ "\t"
+								+ eventItem.ADDRL + " " + eventItem.ADDRR);
 				// TODO: schedule, thread creation order
 			}
 		} catch (Exception e) {
@@ -129,12 +140,18 @@ public class RVPredictLogParser extends Parser {
 
 	void generateSpec() {
 		for (Map.Entry e : locIdThreadAccessSet.entrySet()) {
+			int loc = (int) e.getKey();
 			if (((Set) e.getValue()).size() > 1) {
-				int loc = (int) e.getKey();
 				String varSig = metaData.getVarSig(loc);
 				System.out.println(varSig);
 				spec.shared.add(new Variable("*", varSig.replace("/", ".")
 						.replace("$", "")));
+			} else {
+				// when realized that some variable is not shared, we do not
+				// instrument access to it, so we should remove the
+				// corresponding event from thread schedule
+				for (ScheduleUnit unit : locIdinSchedUnit.get(loc))
+					unit.count--;
 			}
 		}
 		Map<Long, Long> logThreadToRealThread = new HashMap<Long, Long>();
@@ -147,57 +164,54 @@ public class RVPredictLogParser extends Parser {
 			logThreadToRealThread.put(logThread, realThread++);
 		}
 		spec.threads.addAll(logThreadToRealThread.values());
-		
+
 		for (ScheduleUnit unit : spec.schedule)
 			unit.thread = logThreadToRealThread.get(unit.thread);
-		
+
 		// shared vars
 		// thread numbers
 	}
-	
-	static class Parameters{
+
+	static class Parameters {
 		@Parameter(description = "Trace folder")
 		public List<String> inputFolder;
-		
+
 		@Parameter(names = "-output", description = "Output directory")
 		public String outputFolder;
 	}
 
 	static public void main(String[] args) throws IOException {
-		
-		
-		
+
 		Parameters parameters = new Parameters();
 		JCommander parameterParser;
-		try{
+		try {
 			parameterParser = new JCommander(parameters, args);
-		}catch (ParameterException pe){
+		} catch (ParameterException pe) {
 			System.err.println(pe.getMessage());
 			return;
 		}
-		if (parameters.inputFolder == null || !(new File(parameters.inputFolder.get(0))).isDirectory()){
+		if (parameters.inputFolder == null
+				|| !(new File(parameters.inputFolder.get(0))).isDirectory()) {
 			parameterParser.usage();
 			System.exit(1);
 		}
-		
+
 		if (parameters.outputFolder == null)
-			parameters.outputFolder=parameters.inputFolder.get(0);
-		
+			parameters.outputFolder = parameters.inputFolder.get(0);
+
 		File inputFolder = new File(parameters.inputFolder.get(0));
-		
+
 		Parser parser = new RVPredictLogParser(inputFolder);
 		ReplaySpecification spec = parser.parse();
-		
-		File outputFile = new File(inputFolder + File.separator + spec.fileName + ".rs");
-		
+
+		File outputFile = new File(inputFolder + File.separator + spec.fileName
+				+ ".rs");
+
 		FileWriter out = new FileWriter(outputFile);
 		out.write(spec.toString());
-		
+
 		out.close();
-		
-		
-		
-		
+
 	}
 
 }
