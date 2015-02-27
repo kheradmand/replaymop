@@ -18,6 +18,7 @@ public class ReplaySpecification {
 	public Set<Variable> shared;
 	public Set<String> beforeSync;
 	public boolean beforeMonitorEnter = false;
+	public boolean beforeMonitorExit = false;
 	public boolean beforeThreadEnd = false;
 	public Set<String> afterSync;
 	public boolean afterMonitorExit = false;
@@ -27,10 +28,13 @@ public class ReplaySpecification {
 	
 	public static final String[] beforeSyncDefault = {
 		"void java.lang.Thread.join()",
+		"void java.lang.Object.wait(..)",
+		"void java.lang.Object.notify()",
+		"void java.lang.Object.notifyAll(..)",
 	};
 	
 	public static final String[] afterSyncDefault = {
-		
+	
 	};
 	
 	
@@ -46,12 +50,13 @@ public class ReplaySpecification {
 	
 	public void addBeforeSyncDefault(){
 		beforeMonitorEnter = true;
+		beforeMonitorExit = true;
 		beforeThreadEnd = true;
 		beforeSync.addAll(Arrays.asList(beforeSyncDefault));
 	}
 	
 	public void addAfterSyncDefault(){
-		afterMonitorExit = true;
+		//afterMonitorExit = true;
 		//afterThreadBegin = true;
 		afterSync.addAll(Arrays.asList(afterSyncDefault));
 		

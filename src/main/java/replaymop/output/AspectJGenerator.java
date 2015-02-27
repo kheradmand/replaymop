@@ -42,6 +42,8 @@ public class AspectJGenerator {
 		StringJoiner pointcuts = new StringJoiner(" ||\n\t\t\t");
 		if (spec.beforeMonitorEnter)
 			pointcuts.add("lock()");
+		if (spec.beforeMonitorExit)
+			pointcuts.add("unlock()");
 		if (spec.afterThreadBegin){ //trick: before run execution = after thread begin
 			pointcuts.add("execution(* Thread+.run())");
 			pointcuts.add("entryPoint()"); //to handle the main thread
