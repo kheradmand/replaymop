@@ -3,6 +3,7 @@ package replaymop.parser;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -36,7 +37,7 @@ public class RVPredictLogParser extends Parser {
 
 	Map<Integer, Set<Long>> locIdThreadAccessSet = new HashMap<Integer, Set<Long>>();
 	// distinguish array and and non array
-	Map<Integer, Set<ScheduleUnit>> locIdinSchedUnit = new HashMap<Integer, Set<ScheduleUnit>>();
+	Map<Integer, List<ScheduleUnit>> locIdinSchedUnit = new HashMap<Integer, List<ScheduleUnit>>();
 	Set<Long> threads = new TreeSet<Long>();
 
 	public RVPredictLogParser(File logFolder) {
@@ -113,7 +114,7 @@ public class RVPredictLogParser extends Parser {
 						locIdThreadAccessSet.put(loc, new HashSet<Long>());
 					locIdThreadAccessSet.get(loc).add(event.getTID());
 					if (locIdinSchedUnit.get(loc) == null)
-						locIdinSchedUnit.put(loc, new HashSet<ScheduleUnit>());
+						locIdinSchedUnit.put(loc, new ArrayList<ScheduleUnit>());
 					locIdinSchedUnit.get(loc).add(
 							spec.schedule.get(spec.schedule.size() - 1));
 				}

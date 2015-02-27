@@ -65,7 +65,11 @@ public class AspectJGenerator {
 		for (String sync : spec.afterSync){
 			pointcuts.add(String.format("call(%s)", sync));
 		}
-		aspect.setParameter("AFTER_SYNC_POINTCUTS", pointcuts.toString());
+		if (pointcuts.length() > 0){
+			aspect.setParameter("AFTER_SYNC_POINTCUTS", pointcuts.toString());
+			aspect.setParameter("DISABLE_AFTER_SYNC", "");
+		}else
+			aspect.setParameter("DISABLE_AFTER_SYNC", "//");
 	}
 	
 	void generateThreadSchedule() {

@@ -58,15 +58,15 @@ public aspect %NAME% {
 	pointcut beforeSync(): %BEFORE_SYNC_POINTCUTS% 
 			sharedVarAccess() ;
 	
-	pointcut afterSync(): %AFTER_SYNC_POINTCUTS% ;
+	%DISABLE_AFTER_SYNC%pointcut afterSync(): %AFTER_SYNC_POINTCUTS% ;
 	
 	before(): beforeSync() &&  !cflow(adviceexecution()){
 		enforceSchedule();
 	}
 	
-	after(): afterSync() && !cflow(adviceexecution()){
-		enforceSchedule();
-	}
+	%DISABLE_AFTER_SYNC%after(): afterSync() && !cflow(adviceexecution()){
+		%DISABLE_AFTER_SYNC%enforceSchedule();
+	%DISABLE_AFTER_SYNC%}
 	
 	//===========================sync pointcut end===========================
 	
@@ -108,8 +108,9 @@ public aspect %NAME% {
 	schedule_count, this will result in unlimited wait of other threads.
 	the following advice takes care of this situation. 
 	note that this advice should be after the sync point cut advice. 
-	TODO: capture all possible terminations of a thread. is this enough?*/
-	after(): execution(* Thread+.run()) || entryPoint{
+	TODO: capture all possible terminations of a thread. is this enough?
+	TODO: UPDATE: well it seems that such mechanism is required regardless of counting thread and as sync event or not*/
+	after(): execution(* Thread+.run()) || entryPoint(){
 		synchronized(threadScheduleLock){ 
 			long id = Thread.currentThread().getId();
 			if (threadScheduleIndex < schedule_thread.length && schedule_thread[threadScheduleIndex] == id){

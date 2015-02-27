@@ -51,7 +51,7 @@ public class ReplaySpecification {
 	public void addBeforeSyncDefault(){
 		beforeMonitorEnter = true;
 		beforeMonitorExit = true;
-		beforeThreadEnd = true;
+		//beforeThreadEnd = true; 
 		beforeSync.addAll(Arrays.asList(beforeSyncDefault));
 	}
 	
