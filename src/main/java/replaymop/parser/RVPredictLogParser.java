@@ -59,6 +59,9 @@ public class RVPredictLogParser extends Parser {
 		// TODO: sharedvars, threads
 		spec.addAfterSyncDefault();
 		spec.addBeforeSyncDefault();
+		//rv-predict does not log notify 
+		spec.beforeSync.remove("void java.lang.Object.notify()");
+		spec.beforeSync.remove("void java.lang.Object.notifyAll()");
 	}
 
 	boolean important(EventType type) {

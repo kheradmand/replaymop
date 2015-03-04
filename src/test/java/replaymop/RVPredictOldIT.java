@@ -13,11 +13,15 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import com.runtimeverification.rvpredict.engine.main.RVPredict;
+
 @RunWith(Parameterized.class)
 public class RVPredictOldIT {
 	private static String basePath = System.getProperty("user.dir")
 			+ File.separator + "examples" + File.separator + "rv-predict-old";
 
+	private static String rv_predict = "/home/ali/FSL/rv-predict/target/release/rv-predict/bin/rv-predict";
+	
 	Tester tester;
 
 	String folder;
@@ -26,6 +30,7 @@ public class RVPredictOldIT {
 	String workindDir;
 
 	public RVPredictOldIT(String folder, String entryPoint, String input) {
+		
 		this.folder = folder;
 		this.entryPoint = entryPoint;
 		this.input = input;
@@ -33,15 +38,12 @@ public class RVPredictOldIT {
 		tester = new Tester(workindDir);
 	}
 
-	@Test
-	public void test() throws Exception {
-		System.out.println("\ntesting " + folder + "." + entryPoint);
-		
-		//create bin
+	private void compile() throws Exception {
+		// create bin
 		File bin = new File(workindDir + File.separator + "bin");
 		FileUtils.forceMkdir(bin);
-		
-		//compile *.java to bin
+
+		// compile *.java to bin
 		List<String> compile = new ArrayList<>();
 		compile.add("javac");
 		compile.add("-d");
@@ -49,18 +51,44 @@ public class RVPredictOldIT {
 		FileUtils.listFiles(new File(workindDir), new String[] { "java" },
 				false).forEach(f -> compile.add(f.getName()));
 		tester.runCommandInternally(compile.toArray(new String[compile.size()]));
-		
-		//test command
-		//TODO: implement better input (maybe)
+	}
+
+	@Test
+	public void test() throws Exception {
+		System.out.println("\ntesting " + folder + "." + entryPoint);
+
+		compile();
+
+		File bin = new File(workindDir + File.separator + "bin");
+
+		// test command
+		// TODO: implement better input (maybe)
 		tester.testOutputConsistency(entryPoint, 100, true, "java", "-cp",
 				"bin", folder + "." + entryPoint, input);
-		//tester.runCommandInternally("java", "-cp", "bin", folder + "." + entryPoint, input);
-		
-		//remove bin + .out + .err 
+		// tester.runCommandInternally("java", "-cp", "bin", folder + "." +
+		// entryPoint, input);
+
+		// remove bin + .out + .err
 		FileUtils.forceDelete(bin);
 		FileUtils.listFiles(new File(workindDir),
-				new String[] { "out", "err" }, false).forEach(
-				f -> f.delete());
+				new String[] { "out", "err" }, false).forEach(f -> f.delete());
+
+	}
+
+	@Test
+	public void generateReplaySpec() throws Exception {
+		compile();
+		File bin = new File(workindDir + File.separator + "bin");;
+
+		tester.runCommandInternally(rv_predict, "--log", "log" , "--",
+		 "-cp", "bin", folder + "." + entryPoint, input);
+		//com.runtimeverification.rvpredict.engine.main.Main.main(new String[] {
+		//		"--log", workindDir + File.separator + "log", "--", "-cp",
+		//		workindDir + File.separator + "bin", folder + "." + entryPoint,
+		//		input });
+		
+		replaymop.Main.main(new String[] { "-rv-trace",
+				workindDir + File.separator + "log" });
 
 	}
 
@@ -91,7 +119,11 @@ public class RVPredictOldIT {
 		data.add(new Object[] { "simple", "Simple", "" });
 		data.add(new Object[] { "singleton", "Main", "" });
 		data.add(new Object[] { "subtle", "MyThread", "" });
-		data.add(new Object[] { "tsp", "Tsp", basePath + File.separator + "tsp" + File.separator + "tspfiles" + File.separator + "map4", 2 });
+		data.add(new Object[] {
+				"tsp",
+				"Tsp",
+				basePath + File.separator + "tsp" + File.separator + "tspfiles"
+						+ File.separator + "map4", 2 });
 		data.add(new Object[] { "unsafejoin", "Simple", "" });
 		data.add(new Object[] { "wait", "Simple", "" });
 		return data;

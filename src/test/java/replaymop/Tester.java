@@ -165,7 +165,6 @@ public class Tester {
 			String... command) throws IOException, InterruptedException {
 		ProcessBuilder processsBuilder = new ProcessBuilder(command);
 		processsBuilder.directory(pathFile);
-
 		processsBuilder.inheritIO();
 
 		if (inputFile != null && inputFile.exists() && inputFile.isFile())

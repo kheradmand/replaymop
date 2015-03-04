@@ -65,7 +65,7 @@ public aspect %NAME% {
 	}
 	
 	%DISABLE_AFTER_SYNC%after(): afterSync() && !cflow(adviceexecution()){
-		%DISABLE_AFTER_SYNC%enforceSchedule();
+	%DISABLE_AFTER_SYNC%	cd enforceSchedule();
 	%DISABLE_AFTER_SYNC%}
 	
 	//===========================sync pointcut end===========================
