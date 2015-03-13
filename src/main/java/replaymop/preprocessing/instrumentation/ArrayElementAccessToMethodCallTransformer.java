@@ -19,6 +19,8 @@ public class ArrayElementAccessToMethodCallTransformer implements ClassFileTrans
 			Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
 			byte[] classfileBuffer) throws IllegalClassFormatException {
 
+		System.out.println("transformer called");
+		
 		if (exclude(className))
 			return null;
 
@@ -26,6 +28,7 @@ public class ArrayElementAccessToMethodCallTransformer implements ClassFileTrans
 		ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
 		
 		ClassVisitor transformer = new ClassVisitor(Opcodes.ASM5) {
+			
 			@Override
 			public MethodVisitor visitMethod(int access, String name,
 					String desc, String signature, String[] exceptions) {

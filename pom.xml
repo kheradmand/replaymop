@@ -32,6 +32,7 @@
 			<artifactId>asm-all</artifactId>
 			<version>5.0.3</version>
 		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>
@@ -45,6 +46,48 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>replaymop.Main</mainClass>
+						</manifest>
+						<manifestEntries>
+							<Premain-Class>replaymop.preprocessing.instrumentation.Agent</Premain-Class>
+							<Can-Retransform-Classes>true</Can-Retransform-Classes>
+						</manifestEntries>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>replaymop.Main</mainClass>
+						</manifest>
+						<manifestEntries>
+							<Premain-Class>replaymop.preprocessing.instrumentation.Agent</Premain-Class>
+							<Can-Retransform-Classes>true</Can-Retransform-Classes>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -67,6 +110,9 @@
 					</execution>
 				</executions>
 			</plugin>
+
+
+
 		</plugins>
 	</build>
 </project>
