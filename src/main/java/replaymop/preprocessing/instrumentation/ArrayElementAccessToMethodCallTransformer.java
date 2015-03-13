@@ -40,59 +40,61 @@ public class ArrayElementAccessToMethodCallTransformer implements ClassFileTrans
 						// TODO Auto-generated method stub
 						Type owner = Type.getType(Array.class);
 						Type type;
+						Method getMethod = null;
+						Method setMethod = null;
+						try {
 						switch (opcode) {
 						case Opcodes.AALOAD:
-							type = Type.getObjectType("java/lang/Object");
+							getMethod = Method.getMethod(Array.class.getMethod("get", Object.class, int.class));
 						case Opcodes.BALOAD:
-							type = Type.BYTE_TYPE;
+							getMethod = Method.getMethod(Array.class.getMethod("get", byte.class, int.class));
 						case Opcodes.CALOAD:
-							type = Type.CHAR_TYPE;
+							getMethod = Method.getMethod(Array.class.getMethod("get", char.class, int.class));
 						case Opcodes.SALOAD:
-							type = Type.SHORT_TYPE;
+							getMethod = Method.getMethod(Array.class.getMethod("get", short.class, int.class));
 						case Opcodes.IALOAD:
-							type = Type.INT_TYPE;
+							getMethod = Method.getMethod(Array.class.getMethod("get", int.class, int.class));
 						case Opcodes.FALOAD:
-							type = Type.FLOAT_TYPE;
+							getMethod = Method.getMethod(Array.class.getMethod("get", float.class, int.class));
 						case Opcodes.DALOAD:
-							type = Type.DOUBLE_TYPE;
+							getMethod = Method.getMethod(Array.class.getMethod("get", double.class, int.class));
 						case Opcodes.LALOAD:
-							type = Type.LONG_TYPE;
-							Method getMethod = null;
-							try {
-								getMethod = Method.getMethod(Array.class.getMethod("get", type.getClass(), Type.INT_TYPE.getClass()));
-							} catch (NoSuchMethodException | SecurityException e) {
-								e.printStackTrace();
-							}
+							getMethod = Method.getMethod(Array.class.getMethod("get", long.class, int.class));
+							
+							
+								//getMethod = Method.getMethod(Array.class.getMethod("get", (Class)type.getClass(), Type.INT_TYPE.getClass()));
+						
 							((GeneratorAdapter)mv).invokeStatic(owner, getMethod);
 							break;
 						case Opcodes.AASTORE:
-							Type.getObjectType("java/lang/Object");
+							setMethod = Method.getMethod(Array.class.getMethod("set", Object.class, int.class, Object.class));
 						case Opcodes.BASTORE:
-							type = Type.BYTE_TYPE;
+							setMethod = Method.getMethod(Array.class.getMethod("set", Object.class, int.class, byte.class));
 						case Opcodes.CASTORE:
-							type = Type.CHAR_TYPE;
+							setMethod = Method.getMethod(Array.class.getMethod("set", Object.class, int.class, char.class));
 						case Opcodes.SASTORE:
-							type = Type.SHORT_TYPE;
+							setMethod = Method.getMethod(Array.class.getMethod("set", Object.class, int.class, short.class));
 						case Opcodes.IASTORE:
-							type = Type.INT_TYPE;
+							setMethod = Method.getMethod(Array.class.getMethod("set", Object.class, int.class, int.class));
 						case Opcodes.FASTORE:
-							type = Type.FLOAT_TYPE;
+							setMethod = Method.getMethod(Array.class.getMethod("set", Object.class, int.class, float.class));
 						case Opcodes.DASTORE:
-							type = Type.DOUBLE_TYPE;
+							setMethod = Method.getMethod(Array.class.getMethod("set", Object.class, int.class, double.class));
 						case Opcodes.LASTORE:
-							type = Type.LONG_TYPE;
-							Method setMethod = null;
-							try {
-								setMethod = Method.getMethod(Array.class.getMethod("set", type.getClass(), Type.INT_TYPE.getClass(), Type.INT_TYPE.getClass()));
-							} catch (NoSuchMethodException | SecurityException e) {
-								e.printStackTrace();
-							}
+							setMethod = Method.getMethod(Array.class.getMethod("set", Object.class, int.class, long.class));
+							
+							
+//								setMethod = Method.getMethod(Array.class.getMethod("set", type.getClass(), int.class, int.class));
+							
 							((GeneratorAdapter)mv).invokeStatic(owner, setMethod);
 							break;
 						default:
 							super.visitInsn(opcode);
 							break;
 
+						}
+						} catch (NoSuchMethodException | SecurityException e) {
+							e.printStackTrace();
 						}
 
 					}
