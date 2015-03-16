@@ -19,7 +19,7 @@ public class ArrayElementAccessToMethodCallTransformer implements ClassFileTrans
 			Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
 			byte[] classfileBuffer) throws IllegalClassFormatException {
 
-		System.out.println("transformer called");
+		System.out.println("transformer called on " + className);
 		
 		if (exclude(className))
 			return null;
@@ -47,19 +47,19 @@ public class ArrayElementAccessToMethodCallTransformer implements ClassFileTrans
 						case Opcodes.AALOAD:
 							getMethod = Method.getMethod(Array.class.getMethod("get", Object.class, int.class));
 						case Opcodes.BALOAD:
-							getMethod = Method.getMethod(Array.class.getMethod("get", byte.class, int.class));
+							getMethod = Method.getMethod(Array.class.getMethod("get", byte[].class, int.class));
 						case Opcodes.CALOAD:
-							getMethod = Method.getMethod(Array.class.getMethod("get", char.class, int.class));
+							getMethod = Method.getMethod(Array.class.getMethod("get", char[].class, int.class));
 						case Opcodes.SALOAD:
-							getMethod = Method.getMethod(Array.class.getMethod("get", short.class, int.class));
+							getMethod = Method.getMethod(Array.class.getMethod("get", short[].class, int.class));
 						case Opcodes.IALOAD:
-							getMethod = Method.getMethod(Array.class.getMethod("get", int.class, int.class));
+							getMethod = Method.getMethod(Array.class.getMethod("get", int[].class, int.class));
 						case Opcodes.FALOAD:
-							getMethod = Method.getMethod(Array.class.getMethod("get", float.class, int.class));
+							getMethod = Method.getMethod(Array.class.getMethod("get", float[].class, int.class));
 						case Opcodes.DALOAD:
-							getMethod = Method.getMethod(Array.class.getMethod("get", double.class, int.class));
+							getMethod = Method.getMethod(Array.class.getMethod("get", double[].class, int.class));
 						case Opcodes.LALOAD:
-							getMethod = Method.getMethod(Array.class.getMethod("get", long.class, int.class));
+							getMethod = Method.getMethod(Array.class.getMethod("get", long[].class, int.class));
 							
 							
 								//getMethod = Method.getMethod(Array.class.getMethod("get", (Class)type.getClass(), Type.INT_TYPE.getClass()));
@@ -69,20 +69,20 @@ public class ArrayElementAccessToMethodCallTransformer implements ClassFileTrans
 						case Opcodes.AASTORE:
 							setMethod = Method.getMethod(Array.class.getMethod("set", Object.class, int.class, Object.class));
 						case Opcodes.BASTORE:
-							setMethod = Method.getMethod(Array.class.getMethod("set", Object.class, int.class, byte.class));
+							setMethod = Method.getMethod(Array.class.getMethod("set", byte[].class, int.class, byte.class));
 						case Opcodes.CASTORE:
-							setMethod = Method.getMethod(Array.class.getMethod("set", Object.class, int.class, char.class));
+							setMethod = Method.getMethod(Array.class.getMethod("set", char[].class, int.class, char.class));
 						case Opcodes.SASTORE:
-							setMethod = Method.getMethod(Array.class.getMethod("set", Object.class, int.class, short.class));
+							setMethod = Method.getMethod(Array.class.getMethod("set", short[].class, int.class, short.class));
 						case Opcodes.IASTORE:
-							setMethod = Method.getMethod(Array.class.getMethod("set", Object.class, int.class, int.class));
+							setMethod = Method.getMethod(Array.class.getMethod("set", int[].class, int.class, int.class));
 						case Opcodes.FASTORE:
-							setMethod = Method.getMethod(Array.class.getMethod("set", Object.class, int.class, float.class));
+							setMethod = Method.getMethod(Array.class.getMethod("set", float[].class, int.class, float.class));
 						case Opcodes.DASTORE:
-							setMethod = Method.getMethod(Array.class.getMethod("set", Object.class, int.class, double.class));
+							setMethod = Method.getMethod(Array.class.getMethod("set", double[].class, int.class, double.class));
 						case Opcodes.LASTORE:
-							setMethod = Method.getMethod(Array.class.getMethod("set", Object.class, int.class, long.class));
-							
+							setMethod = Method.getMethod(Array.class.getMethod("set", long[].class, int.class, long.class));
+//							
 							
 //								setMethod = Method.getMethod(Array.class.getMethod("set", type.getClass(), int.class, int.class));
 							
@@ -107,7 +107,7 @@ public class ArrayElementAccessToMethodCallTransformer implements ClassFileTrans
 	}
 
 	boolean exclude(String cname) {
-		return cname.startsWith("replaymop");
+		return cname.startsWith("replaymop") || cname.startsWith("java");
 	}
 
 }

@@ -29,6 +29,9 @@ public class Array {
 	public static float get(float[] array, int index) {
 		return array[index];
 	}
+	public static double get(double[] array, int index) {
+		return array[index];
+	}
 
 	// object arrays and multi-dimensional arrays
 	public static void set(Object array, int index, Object value) {
@@ -56,6 +59,9 @@ public class Array {
 	}
 
 	public static void set(float[] array, int index, float value) {
+		array[index] = value;
+	}
+	public static void set(double[] array, int index, double value) {
 		array[index] = value;
 	}
 
