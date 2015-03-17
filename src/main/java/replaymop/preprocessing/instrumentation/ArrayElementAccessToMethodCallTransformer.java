@@ -1,5 +1,6 @@
 package replaymop.preprocessing.instrumentation;
 
+import java.io.PrintWriter;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
@@ -12,6 +13,11 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
+import org.objectweb.asm.util.ASMifier;
+import org.objectweb.asm.util.TraceClassVisitor;
+
+import com.runtimeverification.rvpredict.instrumentation.InstrumentUtils;
+import com.runtimeverification.rvpredict.metadata.ClassFile;
 
 public class ArrayElementAccessToMethodCallTransformer implements ClassFileTransformer {
 	@Override
@@ -19,15 +25,20 @@ public class ArrayElementAccessToMethodCallTransformer implements ClassFileTrans
 			Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
 			byte[] classfileBuffer) throws IllegalClassFormatException {
 
-		System.out.println("transformer called on " + className);
+		//System.out.println("transformer called on " + className);
 		
-		if (exclude(className))
+			
+		ClassFile classFile = ClassFile.getInstance(loader, className, classfileBuffer);
+		if (!InstrumentUtils.needToInstrument(classFile) || exclude(className))
 			return null;
+		
+		System.out.println("Allowed " + className);
 
 		ClassReader reader = new ClassReader(classfileBuffer);
-		ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
+		ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
 		
-		ClassVisitor transformer = new ClassVisitor(Opcodes.ASM5) {
+		ClassVisitor transformer = new ClassVisitor(Opcodes.ASM5, writer) {
+			
 			
 			@Override
 			public MethodVisitor visitMethod(int access, String name,
@@ -35,59 +46,71 @@ public class ArrayElementAccessToMethodCallTransformer implements ClassFileTrans
 				// TODO Auto-generated method stub
 				return new MethodVisitor(Opcodes.ASM5, super.visitMethod(
 						access, name, desc, signature, exceptions)) {
+					
+					 static final String arrayClass = "replaymop/preprocessing/instrumentation/Array";
+					
+					void replaceGet(String type) throws NoSuchMethodException, SecurityException{
+						Method method = Method.getMethod(Array.class.getMethod("get" + type, Object.class, int.class));
+						mv.visitMethodInsn(Opcodes.INVOKESTATIC, arrayClass, method.getName(), method.getDescriptor(), false);
+					}
+					
+					void replaceSet(Class<?> type) throws NoSuchMethodException, SecurityException {
+						Method method = Method.getMethod(Array.class.getMethod("set", Object.class, int.class, type));
+						mv.visitMethodInsn(Opcodes.INVOKESTATIC, arrayClass, method.getName(), method.getDescriptor(), false);
+					}
+					
 					@Override
 					public void visitInsn(int opcode) {
-						// TODO Auto-generated method stub
-						Type owner = Type.getType(Array.class);
-						Type type;
-						Method getMethod = null;
-						Method setMethod = null;
 						try {
 						switch (opcode) {
 						case Opcodes.AALOAD:
-							getMethod = Method.getMethod(Array.class.getMethod("get", Object.class, int.class));
+							replaceGet("");
+							break;
 						case Opcodes.BALOAD:
-							getMethod = Method.getMethod(Array.class.getMethod("get", byte[].class, int.class));
+							replaceGet("byte");
+							break;
 						case Opcodes.CALOAD:
-							getMethod = Method.getMethod(Array.class.getMethod("get", char[].class, int.class));
+							replaceGet("char");
+							break;
 						case Opcodes.SALOAD:
-							getMethod = Method.getMethod(Array.class.getMethod("get", short[].class, int.class));
+							replaceGet("short");
+							break;
 						case Opcodes.IALOAD:
-							getMethod = Method.getMethod(Array.class.getMethod("get", int[].class, int.class));
+							replaceGet("int");
+							break;
 						case Opcodes.FALOAD:
-							getMethod = Method.getMethod(Array.class.getMethod("get", float[].class, int.class));
+							replaceGet("float");
+							break;
 						case Opcodes.DALOAD:
-							getMethod = Method.getMethod(Array.class.getMethod("get", double[].class, int.class));
+							replaceGet("double");
+							break;
 						case Opcodes.LALOAD:
-							getMethod = Method.getMethod(Array.class.getMethod("get", long[].class, int.class));
-							
-							
-								//getMethod = Method.getMethod(Array.class.getMethod("get", (Class)type.getClass(), Type.INT_TYPE.getClass()));
-						
-							((GeneratorAdapter)mv).invokeStatic(owner, getMethod);
-							break;
+							replaceGet("long");
+							break;		
 						case Opcodes.AASTORE:
-							setMethod = Method.getMethod(Array.class.getMethod("set", Object.class, int.class, Object.class));
-						case Opcodes.BASTORE:
-							setMethod = Method.getMethod(Array.class.getMethod("set", byte[].class, int.class, byte.class));
-						case Opcodes.CASTORE:
-							setMethod = Method.getMethod(Array.class.getMethod("set", char[].class, int.class, char.class));
-						case Opcodes.SASTORE:
-							setMethod = Method.getMethod(Array.class.getMethod("set", short[].class, int.class, short.class));
-						case Opcodes.IASTORE:
-							setMethod = Method.getMethod(Array.class.getMethod("set", int[].class, int.class, int.class));
-						case Opcodes.FASTORE:
-							setMethod = Method.getMethod(Array.class.getMethod("set", float[].class, int.class, float.class));
-						case Opcodes.DASTORE:
-							setMethod = Method.getMethod(Array.class.getMethod("set", double[].class, int.class, double.class));
-						case Opcodes.LASTORE:
-							setMethod = Method.getMethod(Array.class.getMethod("set", long[].class, int.class, long.class));
-//							
-							
-//								setMethod = Method.getMethod(Array.class.getMethod("set", type.getClass(), int.class, int.class));
-							
-							((GeneratorAdapter)mv).invokeStatic(owner, setMethod);
+							replaceSet(Object.class);
 							break;
+						case Opcodes.BASTORE:
+							replaceSet(byte.class);
+							break;
+						case Opcodes.CASTORE:
+							replaceSet(char.class);
+							break;
+						case Opcodes.SASTORE:
+							replaceSet(short.class);
+							break;
+						case Opcodes.IASTORE:
+							replaceSet(int.class);
+							break;
+						case Opcodes.FASTORE:
+							replaceSet(float.class);
+							break;
+						case Opcodes.DASTORE:
+							replaceSet(double.class);
+							break;
+						case Opcodes.LASTORE:
+							replaceSet(long.class);
+							break;						
 						default:
 							super.visitInsn(opcode);
 							break;
@@ -96,6 +119,7 @@ public class ArrayElementAccessToMethodCallTransformer implements ClassFileTrans
 						} catch (NoSuchMethodException | SecurityException e) {
 							e.printStackTrace();
 						}
+						//System.out.println("hello world!");
 
 					}
 				};
@@ -103,11 +127,16 @@ public class ArrayElementAccessToMethodCallTransformer implements ClassFileTrans
 		};
 		
 		reader.accept(transformer, ClassReader.EXPAND_FRAMES);
-		return writer.toByteArray();
+		
+		byte [] ret = writer.toByteArray();
+		//(new ClassReader(ret)).accept(new TraceClassVisitor(null, new ASMifier(), new PrintWriter(
+        //        System.out)), ClassReader.EXPAND_FRAMES);
+	
+		return ret;
 	}
 
 	boolean exclude(String cname) {
-		return cname.startsWith("replaymop") || cname.startsWith("java");
+		return cname.startsWith("replaymop") || cname.startsWith("java") || cname.startsWith("sun");
 	}
 
 }
