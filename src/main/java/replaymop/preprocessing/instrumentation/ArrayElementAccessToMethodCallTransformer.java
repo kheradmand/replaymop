@@ -25,7 +25,7 @@ public class ArrayElementAccessToMethodCallTransformer implements ClassFileTrans
 			Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
 			byte[] classfileBuffer) throws IllegalClassFormatException {
 
-		//System.out.println("transformer called on " + className);
+		System.out.println("transformer called on " + className);
 		
 			
 		ClassFile classFile = ClassFile.getInstance(loader, className, classfileBuffer);

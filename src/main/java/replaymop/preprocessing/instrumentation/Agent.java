@@ -2,6 +2,7 @@ package replaymop.preprocessing.instrumentation;
 
 
 import java.lang.instrument.Instrumentation;
+import java.lang.instrument.UnmodifiableClassException;
 
 
 public class Agent {
