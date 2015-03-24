@@ -2,9 +2,12 @@ package replaymop.preprocessing.instrumentation;
 
 public class Array {
 	// object arrays and multi-dimensional arrays
-	public static Object get(Object array, int index) {
+	public static <O extends Object> O get(O[] array, int index) {
 		System.out.println("object get");
-		return ((Object[]) array)[index];
+		Object[] x = array.getClass().cast(array);
+		System.out.println(array.getClass());
+		return  array[index];
+		
 	}
 
 	public static byte getbyte(Object array, int index) {
