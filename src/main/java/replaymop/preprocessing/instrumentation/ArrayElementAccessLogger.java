@@ -10,6 +10,7 @@ import java.util.Set;
 
 import com.runtimeverification.rvpredict.instrumentation.InstrumentUtils;
 import com.runtimeverification.rvpredict.instrumentation.transformer.ClassWriter;
+import com.runtimeverification.rvpredict.instrumentation.transformer.ExceptionHandlerSorter;
 import com.runtimeverification.rvpredict.instrumentation.transformer.MethodTransformer;
 import com.runtimeverification.rvpredict.internal.org.objectweb.asm.ClassReader;
 import com.runtimeverification.rvpredict.internal.org.objectweb.asm.ClassVisitor;
@@ -69,17 +70,7 @@ public class ArrayElementAccessLogger implements ClassFileTransformer {
 			ClassReader reader = new ClassReader(classfileBuffer);
 			ClassWriter writer = new ClassWriter(reader, loader);
 
-			ClassVisitor transformer = new ClassVisitor(Opcodes.ASM5, writer) {
-
-				@Override
-				public MethodVisitor visitMethod(int access, String name,
-						String desc, String signature, String[] exceptions) {
-					// TODO Auto-generated method stub
-
-					return new MyMethodVisitor(Opcodes.ASM5, super.visitMethod(
-							access, name, desc, signature, exceptions));
-				}
-			};
+			ClassVisitor transformer = new MyClassVisitor(Opcodes.ASM5, writer);
 
 			reader.accept(transformer, ClassReader.EXPAND_FRAMES);
 
@@ -103,19 +94,30 @@ public class ArrayElementAccessLogger implements ClassFileTransformer {
 
 }
 
-class MyMethodVisitor extends MethodVisitor {
-	final GeneratorAdapter mv;
-	
-	public MyMethodVisitor(int arg0) {
-		super(arg0);
-		mv = (GeneratorAdapter) super.mv;
-		// TODO Auto-generated constructor stub
+class MyClassVisitor extends ClassVisitor {
+	public MyClassVisitor(int asm5, ClassWriter writer) {
+		super(asm5, writer);
 	}
 
-	public MyMethodVisitor(int asm5, MethodVisitor visitMethod) {
-		// TODO Auto-generated constructor stub
-		super(asm5, visitMethod);
-		mv = (GeneratorAdapter) super.mv;
+	@Override
+	public MethodVisitor visitMethod(int access, String name, String desc,
+			String signature, String[] exceptions) {
+
+		MethodVisitor mv = cv.visitMethod(access, name, desc, signature,
+				exceptions);
+		mv = new ExceptionHandlerSorter(mv, access, name, desc, signature,
+				exceptions);
+		return new MyMethodVisitor(mv, name, desc, access);
+	}
+}
+
+class MyMethodVisitor extends MethodVisitor {
+	final GeneratorAdapter mv;
+
+	public MyMethodVisitor(MethodVisitor mv, String name, String desc,
+			int access) {
+		super(Opcodes.ASM5, new GeneratorAdapter(mv, access, name, desc));
+		this.mv = (GeneratorAdapter) super.mv;
 	}
 
 	static final String arrayClass = "replaymop/preprocessing/instrumentation/Array";
