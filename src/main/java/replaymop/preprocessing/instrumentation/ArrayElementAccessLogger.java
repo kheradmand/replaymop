@@ -73,11 +73,11 @@ public class ArrayElementAccessLogger implements ClassFileTransformer {
 			ClassVisitor transformer = new MyClassVisitor(Opcodes.ASM5, writer);
 
 			reader.accept(transformer, ClassReader.EXPAND_FRAMES);
-
+			
 			byte[] ret = writer.toByteArray();
-			(new ClassReader(ret)).accept(new TraceClassVisitor(null,
-					new ASMifier(), new PrintWriter(System.out)),
-					ClassReader.EXPAND_FRAMES);
+			//(new ClassReader(ret)).accept(new TraceClassVisitor(null,
+			//		new ASMifier(), new PrintWriter(System.out)),
+			//		ClassReader.EXPAND_FRAMES);
 			return ret;
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -121,7 +121,8 @@ class MyMethodVisitor extends MethodVisitor {
 	}
 
 	static final String arrayClass = "replaymop/preprocessing/instrumentation/Array";
-
+	static final Type arrayClassType = Type.getObjectType(arrayClass);
+	
 	@Override
 	public void visitInsn(int opcode) {
 		try {
@@ -139,11 +140,9 @@ class MyMethodVisitor extends MethodVisitor {
 			case Opcodes.LALOAD:
 				mv.dup2();
 				type = MethodTransformer.getValueType(opcode);
-				method = Method.getMethod(Array.class.getMethod("beforeGet"
-						+ type, Object.class, int.class));
+				method = Method.getMethod(Array.class.getMethod("beforeGet", Object.class, int.class));
 				assert method != null;
-				mv.visitMethodInsn(Opcodes.INVOKESTATIC, arrayClass,
-						method.getName(), method.getDescriptor(), false);
+				mv.invokeStatic(arrayClassType,	method);
 				break;
 			case Opcodes.AASTORE:
 			case Opcodes.BASTORE:
@@ -157,12 +156,10 @@ class MyMethodVisitor extends MethodVisitor {
 				value = mv.newLocal(type);
 				mv.storeLocal(value, type);
 				mv.dup2();
-				mv.loadLocal(value, type);
-				method = Method.getMethod(Array.class.getMethod("beforeSet"
-						+ type, Object.class, int.class));
+				method = Method.getMethod(Array.class.getMethod("beforeSet", Object.class, int.class));
 				assert method != null;
-				mv.visitMethodInsn(Opcodes.INVOKESTATIC, arrayClass,
-						method.getName(), method.getDescriptor(), false);
+				mv.invokeStatic(arrayClassType,	method);
+				mv.loadLocal(value, type);
 				break;
 			}
 
