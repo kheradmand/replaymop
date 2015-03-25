@@ -100,7 +100,7 @@ public class RVPredictLogParser extends Parser {
 	protected void startParsing() throws ReplayMOPException {
 		try {
 			EventItem eventItem;
-			for (int index = 1; ((eventItem = trace.getEvent(index)) != null); index++) {
+			for (int index = 1; ((eventItem = trace.getNextEvent()) != null); index++) {
 				Event event = EventUtils.of(eventItem);
 				EventType eventType = event.getType();
 
@@ -127,7 +127,7 @@ public class RVPredictLogParser extends Parser {
 								+ ": "
 								+ event
 								+ " "
-								+ metaData.getStmtSig(event.getID())
+								+ metaData.getStmtSig(event.getLocId())
 								+ "\t"
 								+ eventItem.ADDRL + " " + eventItem.ADDRR);
 				// TODO: schedule, thread creation order

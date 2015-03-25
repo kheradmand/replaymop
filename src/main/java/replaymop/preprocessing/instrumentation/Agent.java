@@ -8,7 +8,7 @@ import java.lang.instrument.UnmodifiableClassException;
 public class Agent {
 	public static void premain(String agentArgs, Instrumentation inst){
 		System.out.println("registering ArrayElementAccessToMethodCallTransformer...");
-		inst.addTransformer(new ArrayElementAccessToMethodCallTransformer(inst), true);
+		inst.addTransformer(new ArrayElementAccessLogger(inst), true);
 		for (Class<?> c : inst.getAllLoadedClasses()) {
             if (inst.isModifiableClass(c)) {
                 try {
