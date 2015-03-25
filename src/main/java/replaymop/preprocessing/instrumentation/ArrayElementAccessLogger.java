@@ -1,6 +1,5 @@
 package replaymop.preprocessing.instrumentation;
 
-import java.io.PrintWriter;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
@@ -18,10 +17,7 @@ import com.runtimeverification.rvpredict.internal.org.objectweb.asm.MethodVisito
 import com.runtimeverification.rvpredict.internal.org.objectweb.asm.Opcodes;
 import com.runtimeverification.rvpredict.internal.org.objectweb.asm.Type;
 import com.runtimeverification.rvpredict.internal.org.objectweb.asm.commons.GeneratorAdapter;
-import com.runtimeverification.rvpredict.internal.org.objectweb.asm.commons.LocalVariablesSorter;
 import com.runtimeverification.rvpredict.internal.org.objectweb.asm.commons.Method;
-import com.runtimeverification.rvpredict.internal.org.objectweb.asm.util.ASMifier;
-import com.runtimeverification.rvpredict.internal.org.objectweb.asm.util.TraceClassVisitor;
 import com.runtimeverification.rvpredict.metadata.ClassFile;
 
 public class ArrayElementAccessLogger implements ClassFileTransformer {
@@ -89,7 +85,14 @@ public class ArrayElementAccessLogger implements ClassFileTransformer {
 	boolean exclude(String cname) {
 		return cname.startsWith("replaymop") || cname.startsWith("java")
 				|| cname.startsWith("sun")
-				|| cname.startsWith("org/objectweb/asm");
+				|| cname.startsWith("org/objectweb/asm")
+				|| cname.startsWith("aj/")
+				|| cname.startsWith("org/aspectj")
+				|| cname.startsWith("org/xml/sax")
+				|| cname.startsWith("com/sun/org/apache/xerces/internal")
+				|| cname.startsWith("com/sun/xml/internal/");
+		
+				
 	}
 
 }
