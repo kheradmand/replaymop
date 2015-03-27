@@ -31,7 +31,8 @@ import replaymop.replayspecification.ScheduleUnit;
 import replaymop.replayspecification.Variable;
 
 public class RVPredictLogParser extends Parser {
-
+	public static final long FIRST_THREAD_ID = 11L; //it is 10 but agents add new thread 
+	
 	OfflineLoggingFactory metaData;
 	TraceCache trace;
 
@@ -167,9 +168,9 @@ public class RVPredictLogParser extends Parser {
 		}
 		Map<Long, Long> logThreadToRealThread = new HashMap<Long, Long>();
 		logThreadToRealThread.put(1L, 1L);
-		Long realThread = 10L;
+		Long realThread = FIRST_THREAD_ID;
 		for (Long logThread : threads) {
-			assert realThread != 10L || logThread == 1L;
+			assert realThread != FIRST_THREAD_ID || logThread == 1L;
 			if (logThread == 1L)
 				continue;
 			logThreadToRealThread.put(logThread, realThread++);
