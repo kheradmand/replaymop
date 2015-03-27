@@ -51,7 +51,14 @@ public aspect %NAME% {
 	
 	//pointcut sharedVarSet():  %SHARED_VAR_SET%
 	
-	%MOCKED_VAR_POINTCUTS%
+	%COLLECTION_POINTCUT_BEGIN%
+	pointcut collection_access() : call(* java.util.Collection+.add*(..)) ||
+	call(* java.util.Collection+.remove*(..)) ||
+	call(* java.util.Collection+.retain*(..)) ||
+	call(* java.util.Collection+.contains*(..)) ||
+	call(* java.util.Collection+.clear*(..)) ||
+	call(* java.util.Collection+.toArray*(..)) ;
+	%COLLECTION_POINTCUT_END%
 	
 	pointcut sharedVarAccess(): %SHARED_VAR_ACCESS%;
 	//sharedVarGet() || sharedVarSet() 

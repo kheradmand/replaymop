@@ -42,37 +42,27 @@ public class AspectJGenerator {
 				pointcuts
 						.add("execution(void replaymop.preprocessing.instrumentation.Array.beforeSet(..))");
 			} else if (var.name.equals(RVPredictLogParser.MOCK_STATE_FIELD)) {
-				String pcName = handleMockVariable(var);
-				if (pcName != null)
-					pointcuts.add(pcName + "()");
+				pointcuts.add(handleMockVariable(var));
 			} else {
 				pointcuts.add(String.format("set(%s %s)", var.type, var.name));
 				pointcuts.add(String.format("get(%s %s)", var.type, var.name));
 			}
 		}
 		aspect.setParameter("SHARED_VAR_ACCESS", pointcuts.toString());
-		aspect.setParameter("MOCKED_VAR_POINTCUTS", mockVariablePointcuts);
+		aspect.setParameter("COLLECTION_POINTCUT_BEGIN", "/*");
+		aspect.setParameter("COLLECTION_POINTCUT_END", "*/");
 	}
 
 	String handleMockVariable(replaymop.replayspecification.Variable var) {
 		try {
-			StringJoiner pointcuts = new StringJoiner(" ||\n\t\t\t");
 			if (Collection.class.isAssignableFrom(Class.forName(var.type))) {
-				pointcuts.add(String.format("call(* %s.Add*(..))", var.type));
-				pointcuts.add(String.format("call(* %s.Remove*(..))", var.type));
-				pointcuts.add(String.format("call(* %s.Retain*(..))", var.type));
-				pointcuts
-						.add(String.format("call(* %s.Contains*(..))", var.type));
-				pointcuts.add(String.format("call(* %s.Clear*(..))", var.type));
-				pointcuts.add(String.format("call(* %s.ToArray*(..))", var.type));
+				aspect.setParameter("COLLECTION_POINTCUT_BEGIN", "");
+				aspect.setParameter("COLLECTION_POINTCUT_END", "");
+				return String.format("(collection_access() && target(%s))", var.type);
+
 			} else {
 				System.err.println("mocked type is not supported " + Class.forName(var.type));
 			}
-			String pointcutName = var.type.replace(".", "_") + "_access";
-			mockVariablePointcuts += String.format(
-					"pointcut %s() : %s ;", pointcutName,
-					pointcuts.toString());
-			return pointcutName;
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
