@@ -4,8 +4,10 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.Condition;
 
-
 public aspect %NAME% {
+	//TODO: replace !cflow(adviceexecution()) whith this
+	pointcut scope() : (!within(replaymop..*) || within(replaymop.preprocessing.instrumentation.Array)) &&
+	  (!cflow(within(replaymop..*)) || cflow(within(replaymop.preprocessing.instrumentation.Array))) ;
 	
 	pointcut entryPoint() : execution(public static void main(String[]));
 
@@ -111,7 +113,7 @@ public aspect %NAME% {
 	the following advice takes care of this situation. 
 	note that this advice should be after the sync point cut advice. 
 	TODO: capture all possible terminations of a thread. is this enough?
-	TODO: UPDATE: well it seems that such mechanism is required regardless of counting thread and as sync event or not*/
+	TODO: UPDATE: well it seems that such mechanism is required regardless of counting thread end as sync event or not*/
 	after(): execution(* Thread+.run()) || entryPoint(){
 		synchronized(threadScheduleLock){ 
 			long id = Thread.currentThread().getId();

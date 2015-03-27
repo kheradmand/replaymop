@@ -6,8 +6,13 @@ import java.lang.instrument.UnmodifiableClassException;
 
 
 public class Agent {
+	public static boolean debug = false;
+	
 	public static void premain(String agentArgs, Instrumentation inst){
-		System.out.println("registering ArrayElementAccessToMethodCallTransformer...");
+		if (agentArgs != null && agentArgs.equals("debug"))
+			debug = true;
+		if (debug)
+			System.out.println("registering ArrayElementAccessToMethodCallTransformer...");
 		inst.addTransformer(new ArrayElementAccessLogger(inst), true);
 		for (Class<?> c : inst.getAllLoadedClasses()) {
             if (inst.isModifiableClass(c)) {
@@ -26,6 +31,7 @@ public class Agent {
                  * accessed by a specific bytecode instruction `arraylength'. */
             }
         }
-		System.out.println("finished preloaded classes");
+		if (debug)
+			System.out.println("finished preloaded classes");
 	}
 }

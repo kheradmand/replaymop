@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 University of Illinois
+ * Copyright (c) 2015 University of Illinois
  * 
  * All rights reserved.
  * 
@@ -32,7 +32,7 @@
  * with more children threads.
  * 
  * @author jeffhuang
- *
+ *		   ali kheramand
  */
 public class Example1 {
 	static Object lock = new Object();
@@ -43,21 +43,23 @@ public class Example1 {
 	{
 		try
 		{
+			System.out.println("before thread creation");
 			MyThread t1 = new MyThread();
 			MyThread t2 = new MyThread();
-	
+			System.out.println("before thread start");
 			t1.start();
 			t2.start();
-		
+			System.out.println("before main lock");
 			synchronized(lock)
 			{
 				x++;
 			}
+			System.out.println("after main lock");
 			
 			x=0;//race here
-			
+			System.out.println("after t1 join");
 			t1.join();
-			
+			System.out.println("after t2 join");
 			t2.join();
 				
 		}catch(Exception e)
@@ -72,17 +74,19 @@ public class Example1 {
 		
 		public void run()
 		{
+			System.out.println("MyThread run");
 			//sleep for 10ms to let main thread go first 
 			try {
 				Thread.sleep(10);
 			} catch (InterruptedException e) {
 			}
-			
+			System.out.println("MyThread before lock");
 			synchronized(lock)
 			{
+				System.out.println("MyThread inside lock");
 				x++;
 			}
-
+			System.out.println("MyThread after lock");
 			
 			System.out.println(1/x);//may throw divide by zero exception
 

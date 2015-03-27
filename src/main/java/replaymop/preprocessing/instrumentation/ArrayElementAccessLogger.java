@@ -51,7 +51,8 @@ public class ArrayElementAccessLogger implements ClassFileTransformer {
 			Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
 			byte[] classfileBuffer) throws IllegalClassFormatException {
 		try {
-			System.out.println("transformer called on " + className);
+			if (Agent.debug)
+				System.out.println("transformer called on " + className);
 
 			checkUninterceptedClassLoading(className, classBeingRedefined);
 
@@ -61,7 +62,8 @@ public class ArrayElementAccessLogger implements ClassFileTransformer {
 					|| exclude(className))
 				return null;
 
-			System.out.println("Allowed " + className);
+			if (Agent.debug)
+				System.out.println("Allowed " + className);
 
 			ClassReader reader = new ClassReader(classfileBuffer);
 			ClassWriter writer = new ClassWriter(reader, loader);

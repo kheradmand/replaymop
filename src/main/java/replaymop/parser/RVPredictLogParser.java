@@ -59,6 +59,7 @@ public class RVPredictLogParser extends Parser {
 		// TODO: sharedvars, threads
 		spec.addAfterSyncDefault();
 		spec.addBeforeSyncDefault();
+		spec.shared.add(new Variable("array", "0")); //TODO: temp
 		//rv-predict does not log notify 
 		spec.beforeSync.remove("void java.lang.Object.notify()");
 		spec.beforeSync.remove("void java.lang.Object.notifyAll()");
@@ -106,13 +107,19 @@ public class RVPredictLogParser extends Parser {
 
 				threads.add(event.getTID());
 
+				System.out.println("----" + event
+				+ " "
+				+ metaData.getStmtSig(event.getLocId())
+				+ "\t"
+				+ eventItem.ADDRL + " " + eventItem.ADDRR);
+				
 				if (!important(eventType))
 					continue;
 
 				addEventToSchedule(event.getTID());
-
-				if (event instanceof MemoryAccessEvent) {
-					int loc = -eventItem.ADDRR;
+				
+				int loc = -eventItem.ADDRR;
+				if (event instanceof MemoryAccessEvent && loc > 0 /*TODO:tem*/) {
 					if (!locIdThreadAccessSet.keySet().contains(loc))
 						locIdThreadAccessSet.put(loc, new HashSet<Long>());
 					locIdThreadAccessSet.get(loc).add(event.getTID());

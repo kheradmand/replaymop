@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 University of Illinois
+ * Copyright (c) 2015 University of Illinois
  * 
  * All rights reserved.
  * 
@@ -35,62 +35,61 @@
  */
 public class Example3 {
 	int[] ia;
-	Something[] oa ;
+	Something[] oa;
 
-	
 	static class Something {
 		int x;
 	}
-	
-	public static void main(String[] args)
-	{
-		
+
+	public static void main(String[] args) {
+
 		(new Example3()).start();
 	}
-	
-	void start(){
+
+	void start() {
 		System.out.println("start");
-		ia = new int[] {1, 2, 3};
-		oa = new Something[] {new Something(), new Something(), new Something()};
-	
-		try
-		{
-			
+		ia = new int[] { 1, 2, 3 };
+		oa = new Something[] { new Something(), new Something(),
+				new Something() };
+
+		try {
+			System.out.println("before thread creation");
 			MyThread t1 = new MyThread();
-			MyThread t2 = new MyThread();
-			
+			// MyThread t2 = new MyThread();
+			System.out.println("before thread start");
 			t1.start();
-			t2.start();
-			
+			// t2.start();
+			System.out.println("before join");
 			t1.join();
-			t2.join();
-			
-				
-		}catch(Exception e)
-		{
+			System.out.println("after join");
+			// t2.join();
+
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
-	 class MyThread extends Thread
-	{
-		
-		public void run()
-		{
-			System.out.println(ia[0]);
-			System.out.println(oa[0]);
-			int i = ia[0];
-			Something o = oa[0];
-			System.out.println(i);
-			System.out.println(o);
-			o.x = 12;
-			System.out.println(oa[0].x);
-			System.out.println("multi-dim");
-			int[][] x = new int[][] {{1,2}, {3,4}};
-			x[0][0] = 10;
-			System.out.println(x[1]);
-			System.out.println(x[1][1]);
-			
+
+	class MyThread extends Thread {
+
+		public void run() {
+			System.out.println("My thread run");
+			synchronized (this) {
+				//replaymop.preprocessing.instrumentation.Array.beforeGet(ia, 0);
+				System.out.println(ia[0]);
+				System.out.println(oa[0]);
+				int i = ia[0];
+				Something o = oa[0];
+				System.out.println(i);
+				System.out.println(o);
+				o.x = 12;
+				System.out.println(oa[0].x);
+				System.out.println("multi-dim");
+				int[][] x = new int[][] { { 1, 2 }, { 3, 4 } };
+				x[0][0] = 10;
+				System.out.println(x[1]);
+				System.out.println(x[1][1]);
+			}
+
 		}
 	}
 }
