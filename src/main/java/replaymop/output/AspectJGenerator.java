@@ -3,6 +3,7 @@ package replaymop.output;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 import replaymop.Parameters;
@@ -51,17 +52,24 @@ public class AspectJGenerator {
 		aspect.setParameter("SHARED_VAR_ACCESS", pointcuts.toString());
 		aspect.setParameter("COLLECTION_POINTCUT_BEGIN", "/*");
 		aspect.setParameter("COLLECTION_POINTCUT_END", "*/");
+		aspect.setParameter("MAP_POINTCUT_BEGIN", "/*");
+		aspect.setParameter("MAP_POINTCUT_END", "*/");
 	}
 
 	String handleMockVariable(replaymop.replayspecification.Variable var) {
 		try {
-			if (Collection.class.isAssignableFrom(Class.forName(var.type))) {
+			Class<?> typeClass = Class.forName(var.type);
+			if (Collection.class.isAssignableFrom(typeClass)) {
 				aspect.setParameter("COLLECTION_POINTCUT_BEGIN", "");
 				aspect.setParameter("COLLECTION_POINTCUT_END", "");
 				return String.format("(collection_access() && target(%s))", var.type);
 
-			} else {
-				System.err.println("mocked type is not supported " + Class.forName(var.type));
+			}else if (Map.class.isAssignableFrom(typeClass)){
+				aspect.setParameter("MAP_POINTCUT_BEGIN", "");
+				aspect.setParameter("MAP_POINTCUT_END", "");
+				return String.format("(map_access() && target(%s))", var.type);
+			}else {
+				System.err.println("mocked type is not supported " + typeClass);
 			}
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block

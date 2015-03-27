@@ -52,13 +52,23 @@ public aspect %NAME% {
 	//pointcut sharedVarSet():  %SHARED_VAR_SET%
 	
 	%COLLECTION_POINTCUT_BEGIN%
-	pointcut collection_access() : call(* java.util.Collection+.add*(..)) ||
-	call(* java.util.Collection+.remove*(..)) ||
-	call(* java.util.Collection+.retain*(..)) ||
-	call(* java.util.Collection+.contains*(..)) ||
-	call(* java.util.Collection+.clear*(..)) ||
-	call(* java.util.Collection+.toArray*(..)) ;
+	pointcut collection_access() : 
+		call(* java.util.Collection+.add*(..)) ||
+		call(* java.util.Collection+.remove*(..)) ||
+		call(* java.util.Collection+.retain*(..)) ||
+		call(* java.util.Collection+.contains*(..)) ||
+		call(* java.util.Collection+.clear*(..)) ||
+		call(* java.util.Collection+.toArray*(..)) ;
 	%COLLECTION_POINTCUT_END%
+	
+	%MAP_POINTCUT_BEGIN%
+	pointcut map_access() : 
+		call(* java.util.Map+.get*(..)) ||
+		call(* java.util.Map+.put*(..)) ||
+		call(* java.util.Map+.remove*(..)) ||
+		call(* java.util.Map+.contains*(..)) ||
+		call(* java.util.Map+.clear*(..)) ;
+	%MAP_POINTCUT_END%
 	
 	pointcut sharedVarAccess(): %SHARED_VAR_ACCESS%;
 	//sharedVarGet() || sharedVarSet() 
