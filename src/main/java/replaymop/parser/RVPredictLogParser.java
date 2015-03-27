@@ -195,6 +195,7 @@ public class RVPredictLogParser extends Parser {
 			dotIndex = 0;
 		String varName = varSig.substring(dotIndex + 1);
 		varSig = varSig.replace("$", ".");
+		varSig = varSig.replace("/", ".");
 		if (varName.startsWith("$")) {
 			assert dotIndex != 0;
 			if (varName.equals(MOCK_STATE_FIELD)) {
