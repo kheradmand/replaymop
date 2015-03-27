@@ -51,6 +51,12 @@ public aspect %NAME% {
 	
 	//pointcut sharedVarSet():  %SHARED_VAR_SET%
 	
+	%ARRAY_POINTCUT_BEGIN%
+	pointcut array_access():
+		execution(void replaymop.preprocessing.instrumentation.Array.beforeGet(..)) ||
+		execution(void replaymop.preprocessing.instrumentation.Array.beforeSet(..));
+	%ARRAY_POINTCUT_END%
+	
 	%COLLECTION_POINTCUT_BEGIN%
 	pointcut collection_access() : 
 		call(* java.util.Collection+.add*(..)) ||

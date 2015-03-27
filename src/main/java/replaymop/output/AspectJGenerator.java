@@ -38,10 +38,9 @@ public class AspectJGenerator {
 		StringJoiner pointcuts = new StringJoiner(" ||\n\t\t\t");
 		for (replaymop.replayspecification.Variable var : spec.shared) {
 			if (var.type.equals("array")) {
-				pointcuts
-						.add("execution(void replaymop.preprocessing.instrumentation.Array.beforeGet(..))");
-				pointcuts
-						.add("execution(void replaymop.preprocessing.instrumentation.Array.beforeSet(..))");
+				aspect.setParameter("ARRAY_POINTCUT_BEGIN", "");
+				aspect.setParameter("ARRAY_POINTCUT_END", "");
+				pointcuts.add("array_access()");
 			} else if (var.name.equals(RVPredictLogParser.MOCK_STATE_FIELD)) {
 				pointcuts.add(handleMockVariable(var));
 			} else {
@@ -54,6 +53,8 @@ public class AspectJGenerator {
 		aspect.setParameter("COLLECTION_POINTCUT_END", "*/");
 		aspect.setParameter("MAP_POINTCUT_BEGIN", "/*");
 		aspect.setParameter("MAP_POINTCUT_END", "*/");
+		aspect.setParameter("ARRAY_POINTCUT_BEGIN", "/*");
+		aspect.setParameter("ARRAY_POINTCUT_END", "*/");
 	}
 
 	String handleMockVariable(replaymop.replayspecification.Variable var) {
