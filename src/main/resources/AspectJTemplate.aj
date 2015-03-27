@@ -51,6 +51,8 @@ public aspect %NAME% {
 	
 	//pointcut sharedVarSet():  %SHARED_VAR_SET%
 	
+	%MOCKED_VAR_POINTCUTS%
+	
 	pointcut sharedVarAccess(): %SHARED_VAR_ACCESS%;
 	//sharedVarGet() || sharedVarSet() 
 	

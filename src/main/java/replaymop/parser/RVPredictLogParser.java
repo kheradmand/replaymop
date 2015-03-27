@@ -31,8 +31,10 @@ import replaymop.replayspecification.ScheduleUnit;
 import replaymop.replayspecification.Variable;
 
 public class RVPredictLogParser extends Parser {
-	public static final long FIRST_THREAD_ID = 11L; //it is 10 but agents add new thread 
-	
+	public static final long FIRST_THREAD_ID = 11L; // it is 10 but agents add
+													// new thread
+	public static final String MOCK_STATE_FIELD = "$state";
+
 	OfflineLoggingFactory metaData;
 	TraceCache trace;
 
@@ -60,8 +62,8 @@ public class RVPredictLogParser extends Parser {
 		// TODO: sharedvars, threads
 		spec.addAfterSyncDefault();
 		spec.addBeforeSyncDefault();
-		spec.shared.add(new Variable("array", "0")); //TODO: temp
-		//rv-predict does not log notify 
+		spec.shared.add(new Variable("array", "0")); // TODO: temp
+		// rv-predict does not log notify
 		spec.beforeSync.remove("void java.lang.Object.notify()");
 		spec.beforeSync.remove("void java.lang.Object.notifyAll()");
 	}
@@ -108,24 +110,23 @@ public class RVPredictLogParser extends Parser {
 
 				threads.add(event.getTID());
 
-				System.out.println("----" + event
-				+ " "
-				+ metaData.getStmtSig(event.getLocId())
-				+ "\t"
-				+ eventItem.ADDRL + " " + eventItem.ADDRR);
-				
+				System.out.println("----" + event + " "
+						+ metaData.getStmtSig(event.getLocId()) + "\t"
+						+ eventItem.ADDRL + " " + eventItem.ADDRR);
+
 				if (!important(eventType))
 					continue;
 
 				addEventToSchedule(event.getTID());
-				
+
 				int loc = -eventItem.ADDRR;
-				if (event instanceof MemoryAccessEvent && loc > 0 /*TODO:tem*/) {
+				if (event instanceof MemoryAccessEvent && loc > 0 /* TODO:tem */) {
 					if (!locIdThreadAccessSet.keySet().contains(loc))
 						locIdThreadAccessSet.put(loc, new HashSet<Long>());
 					locIdThreadAccessSet.get(loc).add(event.getTID());
 					if (locIdinSchedUnit.get(loc) == null)
-						locIdinSchedUnit.put(loc, new ArrayList<ScheduleUnit>());
+						locIdinSchedUnit
+								.put(loc, new ArrayList<ScheduleUnit>());
 					locIdinSchedUnit.get(loc).add(
 							spec.schedule.get(spec.schedule.size() - 1));
 				}
@@ -156,8 +157,7 @@ public class RVPredictLogParser extends Parser {
 			if (((Set) e.getValue()).size() > 1) {
 				String varSig = metaData.getVarSig(loc);
 				System.out.println(varSig);
-				spec.shared.add(new Variable("*", varSig.replace("/", ".")
-						.replace("$", "")));
+				addSharedVariable(varSig);
 			} else {
 				// when realized that some variable is not shared, we do not
 				// instrument access to it, so we should remove the
@@ -182,6 +182,34 @@ public class RVPredictLogParser extends Parser {
 
 		// shared vars
 		// thread numbers
+	}
+
+	private void addSharedVariable(String varSig) {
+		//
+		// spec.shared.add(new Variable("*", varSig.replace("/", ".")
+		// .replace("$", "")));
+
+		Variable var = new Variable();
+		int dotIndex = varSig.lastIndexOf('.');
+		if (dotIndex == -1)
+			dotIndex = 0;
+		String varName = varSig.substring(dotIndex + 1);
+		varSig = varSig.replace("$", ".");
+		if (varName.startsWith("$")) {
+			assert dotIndex != 0;
+			if (varName.equals(MOCK_STATE_FIELD)) {
+				var.type = varSig.substring(0, dotIndex);
+				var.name = varName;
+			}else{
+				System.err.println("unsupported mock variable" + varName);
+			}
+		} else {
+			var.type = "*";
+			var.name = varSig;
+		}
+
+		spec.shared.add(var);
+
 	}
 
 	static class Parameters {
