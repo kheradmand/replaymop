@@ -14,4 +14,7 @@ public class Parameters {
 	@Parameter(names = "-rv-trace", description = "Generate replay specification from RV-Predict's trace")
 	public boolean rv_trace = false;
 	
+	@Parameter(names = "-debug", description = "Generate debug information")
+	public boolean debug = true;
+	
 }

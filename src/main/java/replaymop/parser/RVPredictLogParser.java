@@ -24,6 +24,7 @@ import com.runtimeverification.rvpredict.trace.EventUtils;
 import com.runtimeverification.rvpredict.trace.MemoryAccessEvent;
 import com.runtimeverification.rvpredict.trace.TraceCache;
 
+import replaymop.Main;
 import replaymop.Parameters;
 import replaymop.ReplayMOPException;
 import replaymop.replayspecification.ReplaySpecification;
@@ -52,10 +53,12 @@ public class RVPredictLogParser extends Parser {
 		spec.fileName = logFolder.getName().toUpperCase();
 		initSpec();
 
-		for (int i = 1; metaData.getVarSig(i) != null; i++)
-			System.out
-					.println(String.format("%d: %s", i, metaData.getVarSig(i)));
-		System.out.println("--");
+		if (Main.parameters.debug) {
+			for (int i = 1; metaData.getVarSig(i) != null; i++)
+				System.out.println(String.format("%d: %s", i,
+						metaData.getVarSig(i)));
+			System.out.println("--");
+		}
 	}
 
 	private void initSpec() {
@@ -110,9 +113,10 @@ public class RVPredictLogParser extends Parser {
 
 				threads.add(event.getTID());
 
-				System.out.println("----" + event + " "
-						+ metaData.getStmtSig(event.getLocId()) + "\t"
-						+ eventItem.ADDRL + " " + eventItem.ADDRR);
+				if (Main.parameters.debug)
+					System.out.println("----" + event + " "
+							+ metaData.getStmtSig(event.getLocId()) + "\t"
+							+ eventItem.ADDRL + " " + eventItem.ADDRR);
 
 				if (!important(eventType))
 					continue;
@@ -130,15 +134,15 @@ public class RVPredictLogParser extends Parser {
 					locIdinSchedUnit.get(loc).add(
 							spec.schedule.get(spec.schedule.size() - 1));
 				}
-
-				System.out
-						.println(spec.schedule.get(spec.schedule.size() - 1).count
-								+ ": "
-								+ event
-								+ " "
-								+ metaData.getStmtSig(event.getLocId())
-								+ "\t"
-								+ eventItem.ADDRL + " " + eventItem.ADDRR);
+				if (Main.parameters.debug)
+					System.out
+							.println(spec.schedule.get(spec.schedule.size() - 1).count
+									+ ": "
+									+ event
+									+ " "
+									+ metaData.getStmtSig(event.getLocId())
+									+ "\t"
+									+ eventItem.ADDRL + " " + eventItem.ADDRR);
 				// TODO: schedule, thread creation order
 			}
 		} catch (Exception e) {
@@ -146,9 +150,11 @@ public class RVPredictLogParser extends Parser {
 			throw new ReplayMOPException("error in parsing log file");
 		}
 		generateSpec();
-
-		System.out.println("---");
-		System.out.println(spec);
+		
+		if (Main.parameters.debug){
+			System.out.println("---");
+			System.out.println(spec);
+		}
 	}
 
 	void generateSpec() {
@@ -156,7 +162,8 @@ public class RVPredictLogParser extends Parser {
 			int loc = (int) e.getKey();
 			if (((Set) e.getValue()).size() > 1) {
 				String varSig = metaData.getVarSig(loc);
-				System.out.println(varSig);
+				if (Main.parameters.debug)
+					System.out.println(varSig);
 				addSharedVariable(varSig);
 			} else {
 				// when realized that some variable is not shared, we do not
@@ -201,7 +208,7 @@ public class RVPredictLogParser extends Parser {
 			if (varName.equals(MOCK_STATE_FIELD)) {
 				var.type = varSig.substring(0, dotIndex);
 				var.name = varName;
-			}else{
+			} else {
 				System.err.println("unsupported mock variable" + varName);
 			}
 		} else {

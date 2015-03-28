@@ -17,7 +17,7 @@ public class Tester {
 
 	String path;
 	File pathFile;
-	
+
 	Tester(String path) {
 		this.path = path;
 		pathFile = new File(path);
@@ -53,7 +53,7 @@ public class Tester {
 		File actualErrorFile = getActualErrorFile(prefix);
 		File expectedOutputFile = getExpectedOutputFile(prefix);
 		File expectedErrorFile = getExpectedErrorFile(prefix);
-		
+
 		expectedOutputFile.delete();
 		expectedErrorFile.delete();
 
@@ -65,7 +65,8 @@ public class Tester {
 		Future[] future = new Future[numOfRuns];
 
 		for (int i = 0; i < numOfRuns; i++) {
-			future[i] = pool.submit(new TestOuputTask("consistency-test", i, inspectSuccess, command));
+			future[i] = pool.submit(new TestOuputTask("consistency-test", i,
+					inspectSuccess, command));
 		}
 		pool.shutdown();
 		for (int i = 0; i < numOfRuns; i++)
@@ -74,14 +75,14 @@ public class Tester {
 		System.out.print("\n");
 
 	}
-	
-	class TestOuputTask implements Callable<Void>{
-		
+
+	class TestOuputTask implements Callable<Void> {
+
 		String prefix;
 		int uniqueId;
 		boolean inspectSuccess;
 		String[] command;
-		
+
 		public TestOuputTask(String prefix, int uniqueId,
 				boolean inspectSuccess, String[] command) {
 			super();
@@ -89,17 +90,17 @@ public class Tester {
 			this.uniqueId = uniqueId;
 			this.inspectSuccess = inspectSuccess;
 			this.command = command;
-		}		
-		
+		}
+
 		@Override
 		public Void call() throws Exception {
 			System.out.print(".");
-			testOutput(String.format("consistency-test.%d", uniqueId), inspectSuccess, command);
+			testOutput(String.format("consistency-test.%d", uniqueId),
+					inspectSuccess, command);
 			return null;
 		}
-		
-	}
 
+	}
 
 	private File getExpectedErrorFile(String prefix) {
 		return new File(path + File.separator + getRawPrefix(prefix)
@@ -191,6 +192,11 @@ public class Tester {
 	public int runCommandInternally(String... command) throws IOException,
 			InterruptedException {
 		return runCommand(null, null, null, command);
+	}
+
+	public int runCommandInternallyWithInput(String prefix, String... command)
+			throws IOException, InterruptedException {
+		return runCommand(getInputFile(prefix), null, null, command);
 	}
 
 }

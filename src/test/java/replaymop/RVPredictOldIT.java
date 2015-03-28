@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.RegexFileFilter;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -53,6 +56,7 @@ public class RVPredictOldIT {
 		tester.runCommandInternally(compile.toArray(new String[compile.size()]));
 	}
 
+	@Ignore
 	@Test
 	public void test() throws Exception {
 		System.out.println("\ntesting " + folder + "." + entryPoint);
@@ -74,23 +78,69 @@ public class RVPredictOldIT {
 				new String[] { "out", "err" }, false).forEach(f -> f.delete());
 
 	}
-
+	
+	
+	static final int NUMBER_OF_RUNS = 100;
 	@Test
 	public void generateReplaySpec() throws Exception {
 		compile();
 		File bin = new File(workindDir + File.separator + "bin");;
-
-		tester.runCommandInternally(rv_predict, "--log", "log" , "--",
-		 "-cp", "bin", folder + "." + entryPoint, input);
-		//com.runtimeverification.rvpredict.engine.main.Main.main(new String[] {
-		//		"--log", workindDir + File.separator + "log", "--", "-cp",
-		//		workindDir + File.separator + "bin", folder + "." + entryPoint,
-		//		input });
 		
-		replaymop.Main.main(new String[] { "-rv-trace",
-				workindDir + File.separator + "log" });
-
+		for (int i = 0;i < NUMBER_OF_RUNS; i++){
+			System.out.print(".");
+			tester.runCommandInternally(rv_predict, "--log", "log" , "--output", entryPoint , "--",
+			 "-cp", "bin", folder + "." + entryPoint, input);
+			//com.runtimeverification.rvpredict.engine.main.Main.main(new String[] {
+			//		"--log", workindDir + File.separator + "log", "--", "-cp",
+			//		workindDir + File.separator + "bin", folder + "." + entryPoint,
+			//		input });
+			checkNewOutput();
+				
+		}
+		
+		System.out.println("");
+		
+		FileUtils.forceDelete(bin);
+		FileUtils.forceDelete(new File(workindDir, "log"));
+		//FileUtils.listFiles(new File(workindDir),
+		//		new String[] { "out", "err" }, false).forEach(f -> f.delete());
 	}
+	
+	private void checkNewOutput() throws Exception{
+		File nondeterminism = new File(workindDir + File.separator + "nondeterminism");
+		if (!nondeterminism.exists())
+			FileUtils.forceMkdir(nondeterminism);
+		File newOutputFile = new File(workindDir + File.separator + entryPoint + ".out");
+		File newErrorFile = new File(workindDir + File.separator + entryPoint + ".err");
+		
+		Collection<File> files = FileUtils.listFiles(nondeterminism, new String[] { "out" }, false);
+		boolean isNew = true;
+		int index = 0;
+		for (File file : files){
+			int name = Integer.parseInt(file.getName().substring(0, file.getName().length() - 4));
+			index = Math.max(index, name);
+			File existingOutputFile = new File (nondeterminism, name + ".out");
+			File existingErrorFile = new File (nondeterminism, name + ".err");
+			if (FileUtils.contentEquals(newOutputFile, existingOutputFile) && FileUtils.contentEquals(newErrorFile, existingErrorFile))
+				isNew = false;
+		}
+		index++;
+		if (isNew){
+			System.out.println("\nfound new behaviour: #" + index);
+			FileUtils.copyFile(newOutputFile, new File (nondeterminism, index + ".out"));
+			FileUtils.copyFile(newErrorFile, new File (nondeterminism, index + ".err"));
+			
+			replaymop.Main.main(new String[] { "-debug", "false", "-rv-trace",
+					workindDir + File.separator + "log" });
+			FileUtils.moveFile(new File(workindDir, "LOGAspect.aj"), new File (nondeterminism, index + ".aj"));
+		}
+		
+		FileUtils.forceDelete(newOutputFile);
+		FileUtils.forceDelete(newErrorFile);
+		
+	}
+	
+	
 
 	@Parameters(name = "{0}")
 	public static Collection<Object[]> data() {
