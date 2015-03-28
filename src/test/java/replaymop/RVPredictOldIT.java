@@ -23,7 +23,7 @@ public class RVPredictOldIT {
 	private static String basePath = System.getProperty("user.dir")
 			+ File.separator + "examples" + File.separator + "rv-predict-old";
 
-	private static String rv_predict = "rv-predict";//"/home/ali/FSL/rv-predict/target/release/rv-predict/bin/rv-predict";
+	private static String rv_predict = "/home/ali/FSL/rv-predict/target/release/rv-predict/bin/rv-predict";
 	
 	Tester tester;
 
