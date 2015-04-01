@@ -35,6 +35,8 @@ public class Tester {
 	// }
 	// }
 
+	
+	//TODO: if there is expected output, should first check with that
 	public void testOutputConsistency(String prefix, int numOfRuns,
 			final boolean inspectSuccess, final String... command)
 			throws Exception {

@@ -114,7 +114,7 @@ public class RVPredictLogParser extends Parser {
 				threads.add(event.getTID());
 
 				if (Main.parameters.debug)
-					System.out.println("----" + event + " "
+					System.out.println("--" + index + event + " "
 							+ metaData.getStmtSig(event.getLocId()) + "\t"
 							+ eventItem.ADDRL + " " + eventItem.ADDRR);
 
@@ -158,13 +158,10 @@ public class RVPredictLogParser extends Parser {
 	}
 
 	void generateSpec() {
-		for (Map.Entry e : locIdThreadAccessSet.entrySet()) {
-			int loc = (int) e.getKey();
-			if (((Set) e.getValue()).size() > 1) {
-				String varSig = metaData.getVarSig(loc);
-				if (Main.parameters.debug)
-					System.out.println(varSig);
-				addSharedVariable(varSig);
+		for (Integer loc : locIdThreadAccessSet.keySet()) {
+			Variable var = getSharedVariable(loc);
+			if (var != null) {
+				spec.shared.add(var);
 			} else {
 				// when realized that some variable is not shared, we do not
 				// instrument access to it, so we should remove the
@@ -191,11 +188,19 @@ public class RVPredictLogParser extends Parser {
 		// thread numbers
 	}
 
-	private void addSharedVariable(String varSig) {
+	private Variable getSharedVariable(int loc) {
 		//
 		// spec.shared.add(new Variable("*", varSig.replace("/", ".")
 		// .replace("$", "")));
 
+		String varSig = metaData.getVarSig(loc);
+		
+		if (((Set) locIdThreadAccessSet.get(loc)).size() <= 1)
+			return null;
+		
+		if (Main.parameters.debug)
+			System.out.println(varSig);
+		
 		Variable var = new Variable();
 		int dotIndex = varSig.lastIndexOf('.');
 		if (dotIndex == -1)
@@ -208,15 +213,18 @@ public class RVPredictLogParser extends Parser {
 			if (varName.equals(MOCK_STATE_FIELD)) {
 				var.type = varSig.substring(0, dotIndex);
 				var.name = varName;
-			} else {
-				System.err.println("unsupported mock variable" + varName);
+			} else if (varName.equals("$interruptedStatus")) {
+				return null; //TODO:temprory
+			}else {
+				System.err.println("unsupported mock variable " + varName);
 			}
 		} else {
 			var.type = "*";
 			var.name = varSig;
 		}
-
-		spec.shared.add(var);
+		
+		return var;
+	
 
 	}
 

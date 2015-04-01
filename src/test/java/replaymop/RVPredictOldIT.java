@@ -16,14 +16,20 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import replaymop.utils.AJAgentGenerator;
+
 import com.runtimeverification.rvpredict.engine.main.RVPredict;
+import com.runtimeverification.rvpredict.internal.org.apache.tools.ant.taskdefs.Copyfile;
 
 @RunWith(Parameterized.class)
 public class RVPredictOldIT {
-	private static String basePath = System.getProperty("user.dir")
+	private static String root = System.getProperty("user.dir");
+	
+	private static String basePath =  root
 			+ File.separator + "examples" + File.separator + "rv-predict-old";
 
 	private static String rv_predict = "/home/ali/FSL/rv-predict/target/release/rv-predict/bin/rv-predict";
+	private static String aj_lib = "/home/ali/aspectj1.8/lib";
 	
 	Tester tester;
 
@@ -31,6 +37,8 @@ public class RVPredictOldIT {
 	String entryPoint;
 	String input;
 	String workindDir;
+	
+	File nondeterminism;
 
 	public RVPredictOldIT(String folder, String entryPoint, String input) {
 		
@@ -39,6 +47,8 @@ public class RVPredictOldIT {
 		this.input = input;
 		this.workindDir = basePath + File.separator + folder;
 		tester = new Tester(workindDir);
+		//TODO:add entry point to nondet folder name (after adding such thing to extepcted/actual out err/
+		nondeterminism = new File(workindDir + File.separator + "nondeterminism");
 	}
 
 	private void compile() throws Exception {
@@ -58,7 +68,7 @@ public class RVPredictOldIT {
 
 	@Ignore
 	@Test
-	public void test() throws Exception {
+	public void testOriginalProgram() throws Exception {
 		System.out.println("\ntesting " + folder + "." + entryPoint);
 
 		compile();
@@ -80,16 +90,94 @@ public class RVPredictOldIT {
 	}
 	
 	
-	static final int NUMBER_OF_RUNS = 100;
+	@Test
+	public void testOutputReplayAJ() throws Exception {
+		System.out.println("\ntesting output consistency of relay with aj for " + folder + "." + entryPoint);
+
+		if (!nondeterminism.exists())
+			return;
+		
+		compile();
+
+		File bin = new File(workindDir + File.separator + "bin");
+		
+		//FileUtils.copyFile(new File(root, "ajagent.sh"), new File(workindDir, "ajagent.sh"));
+
+		Collection<File> files = FileUtils.listFiles(nondeterminism, new String[] { "out" }, false);
+		
+		int index = 0;
+		
+		for (File outFile : files){
+			int name = Integer.parseInt(outFile.getName().substring(0, outFile.getName().length() - 4));
+			testOutputReplayAJ(name);
+		}
+		
+		// remove bin 
+		FileUtils.forceDelete(bin);
+
+
+	}
+	
+	
+	private void testOutputReplayAJ(int name) throws Exception {
+		System.out.println("\ntesting " + name);
+		
+		File outFile = new File (nondeterminism, name + ".out");
+		File errFile = new File (nondeterminism, name + ".err");
+		File ajFile = new File (nondeterminism, name + ".aj");
+		
+		if (!errFile.exists() || !ajFile.exists()){
+			System.err.println("behaviour " + name + " seems corrupted, removing it");
+			FileUtils.forceDelete(outFile);
+			FileUtils.forceDelete(errFile);
+			FileUtils.forceDelete(ajFile);
+			return;
+		}
+		
+		
+		File newAjFile = new File (nondeterminism, "LOGAspect.aj");
+		FileUtils.copyFile(ajFile, newAjFile);
+		
+		
+		//org.aspectj.tools.ajc.Main.main(new String [] {newAjFile.getAbsolutePath()});
+		//tester.runCommandInternally("./ajagent.sh", "nondeterminism/LOGAspect.aj");
+		AJAgentGenerator.generateAgent(newAjFile);
+		
+		// test command
+		// TODO: implement better input (maybe)
+		String arrayAgent = String.format("-javaagent:%s/target/replaymop-0.0.1-SNAPSHOT.jar", root);
+		String ajAgent = String.format("-javaagent:%s/aspectjweaver.jar", aj_lib);
+		tester.testOutputConsistency(entryPoint, 100, true, "java", arrayAgent, ajAgent, "-cp",
+				"bin:nondeterminism/agent.jar:$CLASSPATH", folder + "." + entryPoint, input);
+		// tester.runCommandInternally("java", "-cp", "bin", folder + "." +
+		// entryPoint, input);
+		
+		
+		FileUtils.listFiles(new File(workindDir),
+				new String[] { "out", "err" }, false).forEach(f -> f.delete());
+		FileUtils.forceDelete(newAjFile);
+		FileUtils.forceDelete(new File(workindDir + File.separator + "agent.jar"));
+
+	}
+	
+	static final int NUMBER_OF_RUNS = 3;
+	@Ignore
 	@Test
 	public void generateReplaySpec() throws Exception {
+		System.out.println("\ngeneration replay specification for " + folder + "." + entryPoint);
+		
 		compile();
 		File bin = new File(workindDir + File.separator + "bin");;
 		
 		for (int i = 0;i < NUMBER_OF_RUNS; i++){
 			System.out.print(".");
-			tester.runCommandInternally(rv_predict, "--log", "log" , "--output", entryPoint , "--",
-			 "-cp", "bin", folder + "." + entryPoint, input);
+			try{
+				tester.runCommandInternally(rv_predict, "--log", "log" , "--output", entryPoint , "--",
+						"-cp", "bin", folder + "." + entryPoint, input);
+			}catch(InterruptedException e){
+				System.out.println("time limit expired, ignoring this"); //TODO: should not ignore!
+				continue;
+			}
 			//com.runtimeverification.rvpredict.engine.main.Main.main(new String[] {
 			//		"--log", workindDir + File.separator + "log", "--", "-cp",
 			//		workindDir + File.separator + "bin", folder + "." + entryPoint,
@@ -107,7 +195,6 @@ public class RVPredictOldIT {
 	}
 	
 	private void checkNewOutput() throws Exception{
-		File nondeterminism = new File(workindDir + File.separator + "nondeterminism");
 		if (!nondeterminism.exists())
 			FileUtils.forceMkdir(nondeterminism);
 		File newOutputFile = new File(workindDir + File.separator + entryPoint + ".out");
@@ -130,7 +217,7 @@ public class RVPredictOldIT {
 			FileUtils.copyFile(newOutputFile, new File (nondeterminism, index + ".out"));
 			FileUtils.copyFile(newErrorFile, new File (nondeterminism, index + ".err"));
 			
-			replaymop.Main.main(new String[] { "-debug", "false", "-rv-trace",
+			replaymop.Main.main(new String[] { "-debug", "true", "-rv-trace",
 					workindDir + File.separator + "log" });
 			FileUtils.moveFile(new File(workindDir, "LOGAspect.aj"), new File (nondeterminism, index + ".aj"));
 		}
@@ -142,7 +229,7 @@ public class RVPredictOldIT {
 	
 	
 
-	@Parameters(name = "{0}")
+	@Parameters(name = "{0}.{1}")
 	public static Collection<Object[]> data() {
 		ArrayList<Object[]> data = new ArrayList<Object[]>();
 		data.add(new Object[] { "account", "Main", "/dev/null" });
@@ -162,7 +249,7 @@ public class RVPredictOldIT {
 		data.add(new Object[] { "impure", "Simple", "" });
 		data.add(new Object[] { "innerclass", "Simple", "" });
 		data.add(new Object[] { "joinsimple", "Simple", "" });
-		data.add(new Object[] { "mixedlockshuge", "Main", "" });
+		//data.add(new Object[] { "mixedlockshuge", "Main", "" });
 		data.add(new Object[] { "pseudosafecdep", "Main", "" });
 		data.add(new Object[] { "safesimple", "Simple", "" });
 		data.add(new Object[] { "safewait", "Simple", "" });
