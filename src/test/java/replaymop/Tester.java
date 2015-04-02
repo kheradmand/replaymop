@@ -35,8 +35,7 @@ public class Tester {
 	// }
 	// }
 
-	
-	//TODO: if there is expected output, should first check with that
+	// TODO: if there is expected output, should first check with that
 	public void testOutputConsistency(String prefix, int numOfRuns,
 			final boolean inspectSuccess, final String... command)
 			throws Exception {
@@ -135,6 +134,20 @@ public class Tester {
 
 	}
 
+	void filterAJAgentOutput(File file) throws IOException {
+		String contents = FileUtils.readFileToString(file);
+		contents = contents.replaceAll("\\[Java-agent\\] missed to intercept class load\\V+\\v",
+				"");
+		FileUtils.writeStringToFile(file, contents);
+	}
+
+	void filterRVPredictOutput(File file) throws IOException {
+		String contents = FileUtils.readFileToString(file);
+		contents = contents.replaceAll("Log directory:\\V+\\v", "");
+		contents = contents.replaceAll("Finished retransforming preloaded classes.\\v", "");
+		FileUtils.writeStringToFile(file, contents);
+	}
+
 	public int runCommand(String prefix, String... command) throws IOException,
 			InterruptedException {
 
@@ -181,13 +194,23 @@ public class Tester {
 
 		Process process = processsBuilder.start();
 
-		if (process.waitFor(10, TimeUnit.SECONDS))
-			return process.waitFor();
-		else {
+		if (process.waitFor(10, TimeUnit.SECONDS)) {
+			int ret = process.waitFor();
+			// TODO:temp
+			if (outputFile != null) {
+				filterRVPredictOutput(outputFile);
+			}
+			if (errorFile != null){
+				filterAJAgentOutput(errorFile);
+			}
+			return ret;
+		} else {
 			process.destroyForcibly();
 			throw new InterruptedException(
 					"Time limit expired, probabely due to deadlock");
 		}
+		
+		
 
 	}
 

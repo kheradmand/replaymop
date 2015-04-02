@@ -8,7 +8,7 @@ public class Parameters {
 	@Parameter(description = "Input file/folder")
 	public List<String> inputFile;
 	
-	@Parameter(names = "-debug-runtime", description = "Causes the replayed program to print debug info")
+	@Parameter(names = "-debug-runtime", description = "Causes the replayed program to print debug info", arity = 1) //TODO: temp
 	public boolean debug_runtime = true;
 	
 	@Parameter(names = "-rv-trace", description = "Generate replay specification from RV-Predict's trace")

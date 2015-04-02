@@ -1,6 +1,7 @@
 package replaymop;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,6 +21,7 @@ import replaymop.utils.AJAgentGenerator;
 
 import com.runtimeverification.rvpredict.engine.main.RVPredict;
 import com.runtimeverification.rvpredict.internal.org.apache.tools.ant.taskdefs.Copyfile;
+import com.runtimeverification.rvpredict.internal.org.apache.tools.ant.types.Path;
 
 @RunWith(Parameterized.class)
 public class RVPredictOldIT {
@@ -30,6 +32,8 @@ public class RVPredictOldIT {
 
 	private static String rv_predict = "/home/ali/FSL/rv-predict/target/release/rv-predict/bin/rv-predict";
 	private static String aj_lib = "/home/ali/aspectj1.8/lib";
+	
+	private static String classpath = System.getProperty("java.class.path");
 	
 	Tester tester;
 
@@ -142,13 +146,13 @@ public class RVPredictOldIT {
 		//org.aspectj.tools.ajc.Main.main(new String [] {newAjFile.getAbsolutePath()});
 		//tester.runCommandInternally("./ajagent.sh", "nondeterminism/LOGAspect.aj");
 		AJAgentGenerator.generateAgent(newAjFile);
-		
 		// test command
 		// TODO: implement better input (maybe)
 		String arrayAgent = String.format("-javaagent:%s/target/replaymop-0.0.1-SNAPSHOT.jar", root);
 		String ajAgent = String.format("-javaagent:%s/aspectjweaver.jar", aj_lib);
-		tester.testOutputConsistency(entryPoint, 100, true, "java", arrayAgent, ajAgent, "-cp",
-				"bin:nondeterminism/agent.jar:$CLASSPATH", folder + "." + entryPoint, input);
+		String newClasspath = "bin" + File.pathSeparator + "nondeterminism/agent.jar" + File.pathSeparator + classpath;
+		tester.testOutputConsistency(entryPoint, 100, false, "java", arrayAgent, ajAgent, "-cp",
+				newClasspath, folder + "." + entryPoint, input); //does not test for program success
 		// tester.runCommandInternally("java", "-cp", "bin", folder + "." +
 		// entryPoint, input);
 		
@@ -156,7 +160,7 @@ public class RVPredictOldIT {
 		FileUtils.listFiles(new File(workindDir),
 				new String[] { "out", "err" }, false).forEach(f -> f.delete());
 		FileUtils.forceDelete(newAjFile);
-		FileUtils.forceDelete(new File(workindDir + File.separator + "agent.jar"));
+		FileUtils.forceDelete(new File(nondeterminism, "agent.jar"));
 
 	}
 	
@@ -216,7 +220,7 @@ public class RVPredictOldIT {
 			System.out.println("\nfound new behaviour: #" + index);
 			FileUtils.copyFile(newOutputFile, new File (nondeterminism, index + ".out"));
 			FileUtils.copyFile(newErrorFile, new File (nondeterminism, index + ".err"));
-			
+			FileUtils.copyDirectory(new File(workindDir, "log"), new File(nondeterminism, "" + index));
 			replaymop.Main.main(new String[] { "-debug", "true", "-rv-trace",
 					workindDir + File.separator + "log" });
 			FileUtils.moveFile(new File(workindDir, "LOGAspect.aj"), new File (nondeterminism, index + ".aj"));
@@ -226,6 +230,10 @@ public class RVPredictOldIT {
 		FileUtils.forceDelete(newErrorFile);
 		
 	}
+	
+
+	
+	
 	
 	
 

@@ -42,7 +42,7 @@ public class AJAgentGenerator {
 		(new ProcessBuilder("jar", "xf", "../temp.jar")).directory(tempDir).start().waitFor();
 		
 		String xmlFileContent = FileUtils.readFileToString(xmlFile);
-		xmlFileContent.replaceFirst("</aspects>\\s+</aspectj>", "</aspects>\n<weaver options=\"-Xjoinpoints:synchronization\"/>\n</aspectj>");
+		xmlFileContent = xmlFileContent.replaceFirst("</aspects>\\s+</aspectj>", "</aspects>\n<weaver options=\"-Xjoinpoints:synchronization\"/>\n</aspectj>");
 		FileUtils.writeStringToFile(xmlFile, xmlFileContent);
 		
 		(new ProcessBuilder("jar", "cvf", "agent.jar", "-C", tempDirName, ".")).directory(root).start().waitFor();

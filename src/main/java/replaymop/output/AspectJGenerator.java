@@ -129,8 +129,8 @@ public class AspectJGenerator {
 	}
 
 	void handleDebugInfo() {
-		aspect.setParameter("DEBUG_BEGIN", params.debug_runtime ? "" : "\\*");
-		aspect.setParameter("DEBUG_END", params.debug_runtime ? "" : "/*");
+		aspect.setParameter("DEBUG_BEGIN", params.debug_runtime ? "" : "/*");
+		aspect.setParameter("DEBUG_END", params.debug_runtime ? "" : "*/");
 	}
 
 	void startGeneration() {
